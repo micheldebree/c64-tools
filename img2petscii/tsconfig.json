@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "module": "nodenext",
+    "outDir": "built",
+    "noImplicitAny": false,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "allowJs": false,
+    "strictNullChecks": false,
+    "alwaysStrict": true
+  },
+  "exclude": ["node_modules"]
+}

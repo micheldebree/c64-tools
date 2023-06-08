@@ -1,0 +1,23 @@
+{
+  "name": "img2petscii",
+  "version": "0.0.0",
+  "main": "built/img2petscii.js",
+  "author": "Michel de Bree <michel@micheldebree.nl>",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=17.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.2.5",
+    "@typescript-eslint/eslint-plugin": "5.59.9",
+    "@typescript-eslint/parser": "5.59.9",
+    "eslint": "8.42.0",
+    "prettier": "^2.8.8",
+    "typescript": "5.1.3"
+  },
+  "dependencies": {
+    "commander": "^10.0.1",
+    "sharp": "^0.32.1"
+  }
+}
