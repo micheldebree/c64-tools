@@ -205,9 +205,9 @@ async function getBackgroundColor (filename: string): Promise<number> {
   // console.log(config)
 
   // TODO: check for flle override
-  const outputName = `${inputName}.petmate`
 
   try {
+    const outputName = `${inputName}.petmate`
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
     const backgroundColor = await getBackgroundColor(filenames[0])

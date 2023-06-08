@@ -1,4 +1,5 @@
-import { lstat, readdir } from 'node:fs/promises'
+import { lstat, readdir, access } from 'node:fs/promises'
+import fs from 'fs'
 import { fileURLToPath } from 'url'
 import path from 'path'
 import { Stats } from 'fs'
@@ -30,6 +31,15 @@ export async function toFilenames (fileOrFolderName: string, supportedExtensions
     return filtered
   }
   throw new Error(`Unsupported filetype: ${fileOrFolderName}`)
+}
+
+export async function fileExists (filename: string): Promise<boolean> {
+  try {
+    await access(filename, fs.constants.W_OK)
+    return true
+  } catch  {
+    return false
+  }
 }
 
 // get a path relative to this module
