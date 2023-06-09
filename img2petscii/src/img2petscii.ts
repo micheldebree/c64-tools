@@ -41,8 +41,8 @@ enum BackgroundDetectionType {
 }
 
 interface Config {
-  matcher: MatchType
-  backgroundDetection: BackgroundDetectionType
+  matcher: string,
+  backgroundDetection: string,
   allowedChars: number[]
 }
 
@@ -51,8 +51,8 @@ const allChars: Byte[] = Array(255)
   .map((_c, i) => i)
 
 const defaultConfig: Config = {
-  matcher: MatchType.slow,
-  backgroundDetection: BackgroundDetectionType.optimal,
+  matcher: MatchType.slow.toString(),
+  backgroundDetection: BackgroundDetectionType.optimal.toString(),
   allowedChars: allChars
 }
 
@@ -156,9 +156,11 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 // convert an image file to a 40x25 array of screencodes
 async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
   const image: SharpImage = await loadFile(filename)
-  const matcher: MatchFunction = config.matcher === MatchType.fast ? bestFastMatch : bestMatch
+  const matchType:MatchType = MatchType[config.matcher as keyof typeof MatchType]
+  const backgroundDetectionType: BackgroundDetectionType = BackgroundDetectionType[config.backgroundDetection as keyof typeof BackgroundDetectionType]
+  const matcher: MatchFunction = matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor =
-    config.backgroundDetection === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
+    backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
   console.log(`Input: ${filename}`)
   const cells: ScreenCell[] = cutIntoTiles(image).map(t => matcher(t, charSet, backgroundColor, config))
   return { backgroundColor, cells }
@@ -205,7 +207,7 @@ async function getBackgroundColor (filename: string): Promise<number> {
 
   // console.log(config)
 
-  // TODO: check for flle override
+  // TODO: check for file override
 
   try {
     const outputName = `${inputName}.petmate`

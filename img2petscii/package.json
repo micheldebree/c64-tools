@@ -1,6 +1,6 @@
 {
   "name": "img2petscii",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "built/img2petscii.js",
   "bin": {
     "img2petscii": "./built/img2petscii.js"
