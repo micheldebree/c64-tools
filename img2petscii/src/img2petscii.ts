@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import sharp from 'sharp'
 import { writeFile } from 'node:fs/promises'
 import { toFilenames, relativePath } from './utils.js'
