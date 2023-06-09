@@ -1,9 +1,9 @@
 {
   "name": "img2petscii",
   "version": "0.0.2",
-  "main": "built/img2petscii.js",
+  "main": "built/cli.js",
   "bin": {
-    "img2petscii": "./built/img2petscii.js"
+    "img2petscii": "./built/cli.js"
   },
   "author": "Michel de Bree <michel@micheldebree.nl>",
   "license": "MIT",

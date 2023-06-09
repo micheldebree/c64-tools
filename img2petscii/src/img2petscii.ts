@@ -1,10 +1,5 @@
 #!/usr/bin/env node
-import sharp from 'sharp'
-import { writeFile } from 'node:fs/promises'
-import { toFilenames, relativePath } from './utils.js'
-import { Petmate } from './petmate.js'
 import {
-  readChars,
   parse8pixelRow,
   imageCoordinatesToByteOffset,
   cellOffsets,
@@ -18,31 +13,30 @@ import {
   CharSet
 } from './graphics.js'
 import { quantize, quantize2index } from './quantizer.js'
-import { toPetmate, ScreenCell, Screen } from './petmate.js'
-import { Command, Option } from 'commander'
+import { ScreenCell, Screen } from './petmate.js'
 
 interface WeightedScreenCell {
   cell: ScreenCell
   distance: number
 }
 
-interface MatchFunction {
+export interface MatchFunction {
   (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell
 }
 
-enum MatchType {
+export enum MatchType {
   slow,
   fast
 }
 
-enum BackgroundDetectionType {
+export enum BackgroundDetectionType {
   optimal,
   firstPixel
 }
 
-interface Config {
-  matcher: string,
-  backgroundDetection: string,
+export interface Config {
+  matcher: string
+  backgroundDetection: string
   allowedChars: number[]
 }
 
@@ -50,23 +44,13 @@ const allChars: Byte[] = Array(255)
   .fill(0)
   .map((_c, i) => i)
 
-const defaultConfig: Config = {
+export const defaultConfig: Config = {
   matcher: MatchType.slow.toString(),
   backgroundDetection: BackgroundDetectionType.optimal.toString(),
   allowedChars: allChars
 }
 
-const cols = 40
-const rows = 25
-const width: number = cols * 8
-const height: number = rows * 8
-// TODO: case insensitive matching
-const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
-
-// load and scale the image
-async function loadFile (filename: string): Promise<SharpImage> {
-  return await sharp(filename).resize(width, height).removeAlpha().raw().toBuffer({ resolveWithObject: true })
-}
+export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
 // pixels is an array of color indices
 function mostOccuringColorIndex (pixels: number[]): number {
@@ -106,7 +90,7 @@ function tileDistance (t1: Tile, t2: Tile): number {
   return t1.map((row, i) => tileRowDistance(row, t2[i])).reduce((a, v) => a + v, 0)
 }
 
-function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell {
+export function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell {
   let finalDistances: WeightedScreenCell[] = []
 
   Array(16)
@@ -123,7 +107,7 @@ function bestMatch (tile: Tile, chars: CharSet, backgroundColor: number, config:
   return bestCell(finalDistances)
 }
 
-function bestFastMatch (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell {
+export function bestFastMatch (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell {
   const bestColor: number = bestColorMatchForTile(tile, backgroundColor)
   const distances: WeightedScreenCell[] = config.allowedChars.map(charIndex => {
     const charTile = char2Tile(chars[charIndex], bestColor, backgroundColor)
@@ -153,74 +137,21 @@ function cutIntoTiles (img: SharpImage): Tile[] {
   )
 }
 
-// convert an image file to a 40x25 array of screencodes
-async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
-  const image: SharpImage = await loadFile(filename)
-  const matchType:MatchType = MatchType[config.matcher as keyof typeof MatchType]
-  const backgroundDetectionType: BackgroundDetectionType = BackgroundDetectionType[config.backgroundDetection as keyof typeof BackgroundDetectionType]
+// convert an image  to a 40x25 array of screencodes
+export async function convertImage (image: SharpImage, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
+  const matchType: MatchType = MatchType[config.matcher as keyof typeof MatchType]
+  const backgroundDetectionType: BackgroundDetectionType =
+    BackgroundDetectionType[config.backgroundDetection as keyof typeof BackgroundDetectionType]
   const matcher: MatchFunction = matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor =
     backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
-  console.log(`Input: ${filename}`)
   const cells: ScreenCell[] = cutIntoTiles(image).map(t => matcher(t, charSet, backgroundColor, config))
   return { backgroundColor, cells }
 }
 
 // get the overall background color from one file, by just getting the first
 // (quantized) pixel
-async function getBackgroundColor (filename: string): Promise<number> {
-  const image: SharpImage = await loadFile(filename)
+export async function getBackgroundColor (image: SharpImage): Promise<number> {
   return quantize(image)[0]
 }
 
-(async function () {
-  const cli = new Command()
-
-  const optionBackground = new Option('-b, --background <method>', 'method for choosing background color')
-    .choices(['optimal', 'firstPixel'])
-    .default('optimal')
-
-  const optionMethod = new Option('-m, --method <method>', 'method for matching PETSCII characters')
-    .choices(['slow', 'fast'])
-    .default('slow')
-
-  cli
-    .version('0.0.0')
-    .description('Convert images to PETSCII')
-    .usage('[options] <image file|folder>')
-    .addOption(optionMethod)
-    .addOption(optionBackground)
-    .parse(process.argv)
-
-  const options = cli.opts()
-
-  const inputName: string = cli.args[0]
-
-  if (inputName === undefined) {
-    cli.help()
-    process.exit(1)
-  }
-
-  const config = defaultConfig
-  config.backgroundDetection = options.background
-  config.matcher = options.method
-
-  // console.log(config)
-
-  // TODO: check for file override
-
-  try {
-    const outputName = `${inputName}.petmate`
-    const filenames: string[] = await toFilenames(inputName, supportedExtensions)
-    const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
-    const backgroundColor = await getBackgroundColor(filenames[0])
-    const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
-    const petmate: Petmate = toPetmate(screens)
-    await writeFile(outputName, JSON.stringify(petmate))
-    console.log(`Output: ${outputName}`)
-  } catch (err) {
-    console.log(`\nERROR: ${err.message}.\n`)
-    cli.help()
-    process.exit(1)
-  }
-})()
