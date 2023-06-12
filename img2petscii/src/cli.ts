@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import sharp from 'sharp'
 import { Config, convertImage, defaultConfig, supportedExtensions, getBackgroundColor } from './img2petscii.js'
 import { Command, Option } from 'commander'
@@ -21,6 +22,10 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
   return convertImage(image, charSet, firstPixelColor, config)
 }
 
+async function saveConfig (config: Config, filename: string) {
+  await writeFile(filename, JSON.stringify(config))
+}
+
 (async function () {
   const cli = new Command()
 
@@ -33,11 +38,12 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
     .default('slow')
 
   cli
-    .version('0.0.0')
+    .version('0.0.2')
     .description('Convert images to PETSCII')
     .usage('[options] <image file|folder>')
     .addOption(optionMethod)
     .addOption(optionBackground)
+    // .option('--saveConfig <filename>', 'saves config to a json file')
     .parse(process.argv)
 
   const options = cli.opts()
@@ -53,8 +59,6 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
   config.backgroundDetection = options.background
   config.matcher = options.method
 
-  // console.log(config)
-
   // TODO: check for file override
 
   try {
@@ -66,6 +70,9 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
     const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
     const petmate: Petmate = toPetmate(screens)
     await writeFile(outputName, JSON.stringify(petmate))
+    if (options.saveConfig) {
+      await saveConfig(config, options.saveConfig)
+    }
     console.log(`Output: ${outputName}`)
   } catch (err) {
     console.log(`\nERROR: ${err.message}.\n`)

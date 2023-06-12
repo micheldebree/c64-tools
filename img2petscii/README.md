@@ -34,6 +34,8 @@ The input name can be a file, or a folder. In case of a folder, all supported
 images in that folder will be converted into multiple frames in the resulting
 Petmate file. Supported extensions are `.png`, `.jpg` and `.webp`.
 
+Some simple cropping occurs to make the image 320x200 pixels in size.
+
 ### Output
 
 The output is a Petmate file with the input name with `.petmate` appended as
@@ -57,8 +59,8 @@ occuring color.
 
     -b, --background <method>
 
-The `optimal` method quantizes the pixel to the c64 palette and selects the most
-occuring color as the background color.
+The `optimal` method quantizes each image to the c64 palette and selects the most
+occuring color as the background color for that frame.
 
 The `firstPixel` method quantizes the _first pixel in the first image_ and uses
 that as background color. This is useful for converting multiple images to an
