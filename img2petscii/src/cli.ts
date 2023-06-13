@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import sharp from 'sharp'
-import { Config, convertImage, defaultConfig, supportedExtensions, getBackgroundColor } from './img2petscii.js'
+import { convertImage, supportedExtensions, getBackgroundColor } from './img2petscii.js'
 import { Command, Option } from 'commander'
 import { toFilenames, relativePath } from './utils.js'
 import { readChars, SharpImage, CharSet } from './graphics.js'
 import { Petmate, toPetmate, Screen } from './petmate.js'
 import { writeFile } from 'node:fs/promises'
+import { Config, defaultConfig, saveConfig } from './config.js'
 
 const cols = 40
 const rows = 25
@@ -20,10 +21,6 @@ async function loadFile (filename: string): Promise<SharpImage> {
 async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
   const image: SharpImage = await loadFile(filename)
   return convertImage(image, charSet, firstPixelColor, config)
-}
-
-async function saveConfig (config: Config, filename: string) {
-  await writeFile(filename, JSON.stringify(config))
 }
 
 (async function () {
@@ -43,7 +40,7 @@ async function saveConfig (config: Config, filename: string) {
     .usage('[options] <image file|folder>')
     .addOption(optionMethod)
     .addOption(optionBackground)
-    // .option('--saveConfig <filename>', 'saves config to a json file')
+    .option('--saveConfig <filename>', 'saves config to a json file')
     .parse(process.argv)
 
   const options = cli.opts()
@@ -56,8 +53,8 @@ async function saveConfig (config: Config, filename: string) {
   }
 
   const config = defaultConfig
-  config.backgroundDetection = options.background
-  config.matcher = options.method
+  config.backgroundDetectionType = options.background
+  config.matchType = options.method
 
   // TODO: check for file override
 

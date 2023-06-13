@@ -4,7 +4,6 @@ import {
   cellOffsets,
   byte2Pixels,
   distance,
-  Byte,
   PixelColor,
   Tile,
   SharpImage,
@@ -13,6 +12,7 @@ import {
 } from './graphics.js'
 import { quantize, quantize2index } from './quantizer.js'
 import { ScreenCell, Screen } from './petmate.js'
+import { Config, MatchType, BackgroundDetectionType } from './config.js'
 
 interface WeightedScreenCell {
   cell: ScreenCell
@@ -21,32 +21,6 @@ interface WeightedScreenCell {
 
 export interface MatchFunction {
   (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell
-}
-
-export enum MatchType {
-  slow,
-  fast
-}
-
-export enum BackgroundDetectionType {
-  optimal,
-  firstPixel
-}
-
-export interface Config {
-  matcher: string
-  backgroundDetection: string
-  allowedChars: number[]
-}
-
-const allChars: Byte[] = Array(255)
-  .fill(0)
-  .map((_c, i) => i)
-
-export const defaultConfig: Config = {
-  matcher: MatchType.slow.toString(),
-  backgroundDetection: BackgroundDetectionType.optimal.toString(),
-  allowedChars: allChars
 }
 
 export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
@@ -138,12 +112,9 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 
 // convert an image  to a 40x25 array of screencodes
 export async function convertImage (image: SharpImage, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
-  const matchType: MatchType = MatchType[config.matcher as keyof typeof MatchType]
-  const backgroundDetectionType: BackgroundDetectionType =
-    BackgroundDetectionType[config.backgroundDetection as keyof typeof BackgroundDetectionType]
-  const matcher: MatchFunction = matchType === MatchType.fast ? bestFastMatch : bestMatch
+  const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor =
-    backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
+    config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
   const cells: ScreenCell[] = cutIntoTiles(image).map(t => matcher(t, charSet, backgroundColor, config))
   return { backgroundColor, cells }
 }
