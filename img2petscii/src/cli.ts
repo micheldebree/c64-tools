@@ -6,7 +6,7 @@ import { toFilenames, relativePath } from './utils.js'
 import { readChars, SharpImage, CharSet } from './graphics.js'
 import { Petmate, toPetmate, Screen } from './petmate.js'
 import { writeFile } from 'node:fs/promises'
-import { Config, defaultConfig, saveConfig } from './config.js'
+import { Config, defaultConfig, saveConfig, loadConfig } from './config.js'
 
 const cols = 40
 const rows = 25
@@ -35,11 +35,12 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
     .default('slow')
 
   cli
-    .version('0.0.2')
+    .version('0.0.3')
     .description('Convert images to PETSCII')
     .usage('[options] <image file|folder>')
     .addOption(optionMethod)
     .addOption(optionBackground)
+    .option('--loadConfig <filename>', 'load config from a json file')
     .option('--saveConfig <filename>', 'saves config to a json file')
     .parse(process.argv)
 
@@ -52,10 +53,6 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
     process.exit(1)
   }
 
-  const config = defaultConfig
-  config.backgroundDetectionType = options.background
-  config.matchType = options.method
-
   // TODO: check for file override
 
   try {
@@ -64,6 +61,13 @@ async function convertFile (filename: string, charSet: CharSet, firstPixelColor:
     const charSet: CharSet = await readChars(relativePath('./characters.901225-01.bin'))
     const firstImage: SharpImage = await loadFile(filenames[0])
     const backgroundColor = await getBackgroundColor(firstImage)
+
+    let config = defaultConfig
+    config.backgroundDetectionType = options.background
+    config.matchType = options.method
+    if (options.loadConfig) {
+      config = await loadConfig(options.loadConfig)
+    }
     const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
     const petmate: Petmate = toPetmate(screens)
     await writeFile(outputName, JSON.stringify(petmate))

@@ -1,4 +1,4 @@
-import { writeFile } from 'node:fs/promises'
+import { readFile, writeFile } from 'node:fs/promises'
 
 export interface Config {
   matchType: MatchType
@@ -15,9 +15,11 @@ export enum BackgroundDetectionType {
   optimal = 'optimal',
   firstPixel = 'firstPixel'
 }
+
 const allChars: number[] = Array(255)
   .fill(0)
   .map((_c, i) => i)
+
 export const defaultConfig: Config = {
   matchType: MatchType.slow,
   backgroundDetectionType: BackgroundDetectionType.optimal,
@@ -26,4 +28,9 @@ export const defaultConfig: Config = {
 
 export async function saveConfig (config: Config, filename: string): Promise<void> {
   await writeFile(filename, JSON.stringify(config))
+}
+
+export async function loadConfig (filename: string): Promise<Config> {
+  const buf: Buffer = await readFile(filename)
+  return JSON.parse(buf.toString())
 }

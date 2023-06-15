@@ -25,6 +25,8 @@ Options:
                              "slow", "fast", default: "slow")
   -b, --background <method>  method for choosing background color (choices:
                              "optimal", "firstPixel", default: "optimal")
+  --loadConfig <filename>    load config from a json file
+  --saveConfig <filename>    saves config to a json file
   -h, --help                 display help for command
 ```
 
@@ -68,3 +70,10 @@ animation, where the `optimal` setting might decide on different background
 colors for different frames in the animation. The `firstPixel` option always
 uses one background color for the whole animation.
 
+    --saveConfig <filename>
+    --loadConfig <filename>
+
+Save configuraton to a JSON file, or load a save configuration. The
+configuration file holds the values supplied on the command line, and default
+values. In addition it contains the list of screencodes that are allowed.
+Editing this JSON file enables you to limit these screencodes.
