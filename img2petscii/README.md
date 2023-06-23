@@ -12,7 +12,7 @@ This is a command line tool aimed at developers and graphic artists.
 There is no need to download `img2petscii`, just do this:
 
 - Make sure [Node.js](https://nodejs.org/) 17 or higher is installed
-- `npm install img2petscii`
+- `npm install -g img2petscii`
 
 You now have a command called `img2petscii`
 
@@ -84,3 +84,11 @@ Save configuraton to a JSON file, or load a saved configuration. The
 configuration file holds the values supplied on the command line, and default
 values. In addition it contains the list of screencodes that are allowed.
 Editing this JSON file enables you to limit these screencodes.
+
+### Converting animated GIF
+
+`img2petscii` was written for the Commodore 64 demo "Staying Alive" for
+converting animated GIF to PETSCII. You cannot supply an animated GIF directly
+to `img2petscii`, but you need to extract the frames of the GIF first. The
+process is explained in this [blogpost about "Staying
+Alive"](https://www.micheldebree.nl/posts/staying_alive/)
