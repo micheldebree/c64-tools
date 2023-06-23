@@ -30,7 +30,7 @@ export async function toFilenames (fileOrFolderName: string, supportedExtensions
     }
     return filtered
   }
-  throw new Error(`Unsupported filetype: ${fileOrFolderName}`)
+  throw new Error(`Unsupported file type: ${fileOrFolderName}`)
 }
 
 export async function fileExists (filename: string): Promise<boolean> {

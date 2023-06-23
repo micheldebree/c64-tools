@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises'
 export interface Config {
   matchType: MatchType
   backgroundDetectionType: BackgroundDetectionType
+  charSetType: CharsetType
   allowedChars: number[]
 }
 
@@ -16,6 +17,11 @@ export enum BackgroundDetectionType {
   firstPixel = 'firstPixel'
 }
 
+export enum CharsetType {
+  uppercase = 'uppercase',
+  lowercase = 'lowercase'
+}
+
 const allChars: number[] = Array(255)
   .fill(0)
   .map((_c, i) => i)
@@ -23,6 +29,7 @@ const allChars: number[] = Array(255)
 export const defaultConfig: Config = {
   matchType: MatchType.slow,
   backgroundDetectionType: BackgroundDetectionType.optimal,
+  charSetType: CharsetType.uppercase,
   allowedChars: allChars
 }
 

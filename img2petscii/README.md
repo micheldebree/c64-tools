@@ -9,8 +9,12 @@ This is a command line tool aimed at developers and graphic artists.
 
 ## Install
 
+There is no need to download `img2petscii`, just do this:
+
 - Make sure [Node.js](https://nodejs.org/) 17 or higher is installed
 - `npm install img2petscii`
+
+You now have a command called `img2petscii`
 
 ## Usage
 
@@ -21,6 +25,8 @@ Convert images to PETSCII
 
 Options:
   -V, --version              output the version number
+  -c, --charset <name>       which ROM character set to use (choices:
+                             "uppercase", "lowercase", default: "uppercase")
   -m, --method <method>      method for matching PETSCII characters (choices:
                              "slow", "fast", default: "slow")
   -b, --background <method>  method for choosing background color (choices:
@@ -34,7 +40,8 @@ Options:
 
 The input name can be a file, or a folder. In case of a folder, all supported
 images in that folder will be converted into multiple frames in the resulting
-Petmate file. Supported extensions are `.png`, `.jpg` and `.webp`.
+Petmate file, in alphabetical order. Supported extensions are `.png`, `.jpg` and
+`.webp`.
 
 Some simple cropping occurs to make the image 320x200 pixels in size.
 
@@ -73,7 +80,7 @@ uses one background color for the whole animation.
     --saveConfig <filename>
     --loadConfig <filename>
 
-Save configuraton to a JSON file, or load a save configuration. The
+Save configuraton to a JSON file, or load a saved configuration. The
 configuration file holds the values supplied on the command line, and default
 values. In addition it contains the list of screencodes that are allowed.
 Editing this JSON file enables you to limit these screencodes.

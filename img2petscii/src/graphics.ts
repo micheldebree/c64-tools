@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { OutputInfo } from 'sharp'
+import sharp, { Sharp, OutputInfo } from 'sharp'
 import { palette } from './quantizer.js'
 
 export type Byte = number
@@ -98,17 +98,43 @@ export function mapByteOrder (offset: number, bytesPerRow: number): number {
   return y * bytesPerRow + x
 }
 
-// read the characters from a binary character set
-// return: an array of 8-Byte arrays
-export async function readChars (filename: string): Promise<CharSet> {
+// read 256 characters from a binary character set
+export async function readChars (filename: string, offset = 0): Promise<CharSet> {
   const buffer: Buffer = await readFile(filename)
-
-  // read only the first charset
-  const charData: Byte[] = Array.from(buffer).slice(0, 255 * 8)
-
+  const charData: Byte[] = Array.from(buffer).slice(offset * 8, (offset + 256) * 8)
   const chars: CharSet = []
   forEachCharIn(charData, (_i: number, charBytes: Byte[]) => chars.push(charBytes))
   return chars
+}
+
+// convert a Char (8 bytes) to a colored tile (8 x 8 [r, g, b] pixels)
+export function char2Tile (char: Char, color: number, backgroundColor: number): Tile {
+  return Array.from(char).map(b => byte2Pixels(b, color, backgroundColor))
+}
+
+export async function createImage (width: number, height: number): Promise<SharpImage> {
+  const imageSize = width * height * 3
+  const imageData = new Uint8Array(imageSize).fill(0, 0, imageSize)
+
+  return sharp(imageData, {
+    // because the input does not contain its dimensions or how many channels it has
+    // we need to specify it in the constructor options
+    raw: {
+      width,
+      height,
+      channels: 3
+    }
+  }).toBuffer({ resolveWithObject: true })
+}
+
+export async function toSharp (image: SharpImage): Promise<Sharp> {
+  return sharp(image.data, {
+    raw: {
+      width: image.info.width,
+      height: image.info.height,
+      channels: image.info.channels
+    }
+  })
 }
 
 // async function saveChars (chars) {

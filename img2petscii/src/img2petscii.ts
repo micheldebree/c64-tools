@@ -2,13 +2,12 @@ import {
   parse8pixelRow,
   imageCoordinatesToByteOffset,
   cellOffsets,
-  byte2Pixels,
   distance,
   PixelColor,
   Tile,
   SharpImage,
-  Char,
-  CharSet
+  CharSet,
+  char2Tile
 } from './graphics.js'
 import { quantize, quantize2index } from './quantizer.js'
 import { ScreenCell, Screen } from './petmate.js'
@@ -25,20 +24,14 @@ export interface MatchFunction {
 
 export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
-// pixels is an array of color indices
-function mostOccuringColorIndex (pixels: number[]): number {
+function mostOccurringColorIndex (pixels: number[]): number {
   const counts: number[] = Array(16).fill(0)
   pixels.forEach(p => counts[p]++)
   return counts.map((c, i) => [i, c]).reduce((a, v) => (v[1] > a[1] ? v : a), [0, 0])[0]
 }
 
 function bestBackgroundColor (img: SharpImage): number {
-  return mostOccuringColorIndex(quantize(img))
-}
-
-// convert a Char (8 bytes) to a colored tile (8 x 8 [r, g, b] pixels)
-function char2Tile (char: Char, color: number, backgroundColor: number): Tile {
-  return Array.from(char).map(b => byte2Pixels(b, color, backgroundColor))
+  return mostOccurringColorIndex(quantize(img))
 }
 
 function bestCell (allDistances: WeightedScreenCell[]) {
@@ -94,9 +87,9 @@ function quantizeTile (tile: Tile): number[] {
   return tile.flatMap(row => row.map(p => quantize2index(p)))
 }
 
-// get the most occuring color for the tile, excluding background color
+// get the most occurring color for the tile, excluding background color
 function bestColorMatchForTile (tile: Tile, backgroundColor: number): number {
-  return mostOccuringColorIndex(quantizeTile(tile).filter(c => c !== backgroundColor))
+  return mostOccurringColorIndex(quantizeTile(tile).filter(c => c !== backgroundColor))
 }
 
 // cut SharpImage in 8x8 PixelColor tiles, this is a three dimensional array:
@@ -124,4 +117,3 @@ export async function convertImage (image: SharpImage, charSet: CharSet, firstPi
 export async function getBackgroundColor (image: SharpImage): Promise<number> {
   return quantize(image)[0]
 }
-

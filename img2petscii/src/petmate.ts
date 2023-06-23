@@ -38,7 +38,7 @@ export function fromJSON (json: string): Petmate {
   return content
 }
 
-function toFramebuf (screen: Screen, name: string): FrameBuf {
+function toFramebuf (screen: Screen, name: string, charset = 'upper'): FrameBuf {
   const { backgroundColor, cells } = screen
 
   const framebuf: ScreenCell[][] = []
@@ -54,15 +54,15 @@ function toFramebuf (screen: Screen, name: string): FrameBuf {
     height: rows,
     backgroundColor,
     borderColor: 0,
-    charset: 'upper',
+    charset,
     name,
     framebuf,
     customFonts: {}
   }
 }
 
-export function toPetmate (screens: Screen[]): Petmate {
-  const framebufs: FrameBuf[] = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`))
+export function toPetmate (screens: Screen[], charset = 'upper'): Petmate {
+  const framebufs: FrameBuf[] = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`, charset))
   const screenNumbers: number[] = Array.from(Array(screens.length).keys())
   return {
     version: 2,
