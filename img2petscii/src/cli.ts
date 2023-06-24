@@ -38,6 +38,12 @@ async function assertFileDoesNotExist (filename: string, config: Config): Promis
   }
 }
 
+async function savePetmate(screens: Screen[], filename: string, config: Config) {
+    const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
+    const petmate: Petmate = toPetmate(screens, petmateCharset)
+    await writeFile(filename, JSON.stringify(petmate))
+}
+
 (async function () {
   const cli = new Command()
 
@@ -96,9 +102,7 @@ async function assertFileDoesNotExist (filename: string, config: Config): Promis
     const charSet: CharSet = await loadCharset(config)
     const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
 
-    const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
-    const petmate: Petmate = toPetmate(screens, petmateCharset)
-    await writeFile(outputName, JSON.stringify(petmate))
+    await savePetmate(screens, outputName, config)
 
     if (options.saveConfig) {
       await saveConfig(config, options.saveConfig)
