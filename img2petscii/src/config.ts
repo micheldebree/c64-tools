@@ -5,6 +5,16 @@ export interface Config {
   backgroundDetectionType: BackgroundDetectionType
   charSetType: CharsetType
   allowedChars: number[]
+  overwrite: boolean
+}
+
+export interface CliOptions {
+  background: BackgroundDetectionType
+  method: MatchType
+  charset: CharsetType
+  loadConfig: string
+  saveConfig: string
+  overwrite: boolean
 }
 
 export enum MatchType {
@@ -30,7 +40,17 @@ export const defaultConfig: Config = {
   matchType: MatchType.slow,
   backgroundDetectionType: BackgroundDetectionType.optimal,
   charSetType: CharsetType.uppercase,
-  allowedChars: allChars
+  allowedChars: allChars,
+  overwrite: false
+}
+
+export function fromCliOptions (options: CliOptions) {
+  const result = defaultConfig
+  result.backgroundDetectionType = options.background
+  result.matchType = options.method
+  result.charSetType = options.charset
+  result.overwrite = options.overwrite
+  return result
 }
 
 export async function saveConfig (config: Config, filename: string): Promise<void> {

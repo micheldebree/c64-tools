@@ -2,12 +2,14 @@
 import sharp from 'sharp'
 import { convertImage, supportedExtensions, getBackgroundColor } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { toFilenames, relativePath } from './utils.js'
+import { toFilenames, relativePath, fileExists } from './utils.js'
 import { readChars, SharpImage, CharSet } from './graphics.js'
 import { Petmate, toPetmate, Screen } from './petmate.js'
 import { writeFile } from 'node:fs/promises'
-import { Config, defaultConfig, saveConfig, loadConfig, CharsetType } from './config.js'
+import { Config, saveConfig, loadConfig, CharsetType, fromCliOptions, CliOptions } from './config.js'
 
+// TODO get version from package.json
+const version = '0.0.5'
 const cols = 40
 const rows = 25
 const width: number = cols * 8
@@ -29,6 +31,13 @@ async function loadCharset (config: Config): Promise<CharSet> {
   return await readChars(relativePath('./characters.901225-01.bin'), offset)
 }
 
+async function assertFileDoesNotExist (filename: string, config: Config): Promise<void> {
+  const exists = await fileExists(filename)
+  if (exists && !config.overwrite) {
+    throw new Error(`Output file ${filename} already exists. Use --overwrite to force overwriting.`)
+  }
+}
+
 (async function () {
   const cli = new Command()
 
@@ -45,7 +54,7 @@ async function loadCharset (config: Config): Promise<CharSet> {
     .default('uppercase')
 
   cli
-    .version('0.0.4')
+    .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <image file|folder>')
     .addOption(optionCharset)
@@ -53,6 +62,7 @@ async function loadCharset (config: Config): Promise<CharSet> {
     .addOption(optionBackground)
     .option('--loadConfig <filename>', 'load config from a json file')
     .option('--saveConfig <filename>', 'saves config to a json file')
+    .option('--overwrite', 'force overwrite of existing files')
     .parse(process.argv)
 
   const inputName: string = cli.args[0]
@@ -66,18 +76,21 @@ async function loadCharset (config: Config): Promise<CharSet> {
 
   try {
     const outputName = `${inputName}.petmate`
+
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0])
     const backgroundColor = await getBackgroundColor(firstImage)
 
-    let config = defaultConfig
-    const options = cli.opts()
-    config.backgroundDetectionType = options.background
-    config.matchType = options.method
-    config.charSetType = options.charset
+    const options: CliOptions = cli.opts()
+    let config = fromCliOptions(options)
+
+    await assertFileDoesNotExist(outputName, config)
 
     if (options.loadConfig) {
       config = await loadConfig(options.loadConfig)
+    }
+    if (options.saveConfig) {
+      await assertFileDoesNotExist(options.saveConfig, config)
     }
 
     const charSet: CharSet = await loadCharset(config)
@@ -86,6 +99,7 @@ async function loadCharset (config: Config): Promise<CharSet> {
     const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
     const petmate: Petmate = toPetmate(screens, petmateCharset)
     await writeFile(outputName, JSON.stringify(petmate))
+
     if (options.saveConfig) {
       await saveConfig(config, options.saveConfig)
     }
@@ -96,7 +110,6 @@ async function loadCharset (config: Config): Promise<CharSet> {
     console.log(`Output: ${outputName}`)
   } catch (err) {
     console.log(`\nERROR: ${err.message}.\n`)
-    console.log(err)
     cli.help()
     process.exit(1)
   }
