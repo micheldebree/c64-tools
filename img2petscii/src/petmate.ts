@@ -8,6 +8,7 @@ export interface ScreenCell {
 
 // TODO: this is not petmate specific?
 export interface Screen {
+  id: string
   backgroundColor: number
   cells: ScreenCell[]
 }
@@ -38,7 +39,7 @@ export function fromJSON (json: string): Petmate {
   return content
 }
 
-function toFramebuf (screen: Screen, name: string, charset = 'upper'): FrameBuf {
+function toFramebuf (screen: Screen, charset = 'upper'): FrameBuf {
   const { backgroundColor, cells } = screen
 
   const framebuf: ScreenCell[][] = []
@@ -55,14 +56,14 @@ function toFramebuf (screen: Screen, name: string, charset = 'upper'): FrameBuf 
     backgroundColor,
     borderColor: 0,
     charset,
-    name,
+    name: screen.id,
     framebuf,
     customFonts: {}
   }
 }
 
 export function toPetmate (screens: Screen[], charset = 'upper'): Petmate {
-  const framebufs: FrameBuf[] = screens.map((screen, i) => toFramebuf(screen, `screen_${i}`, charset))
+  const framebufs: FrameBuf[] = screens.map(screen => toFramebuf(screen, charset))
   const screenNumbers: number[] = Array.from(Array(screens.length).keys())
   return {
     version: 2,
@@ -74,4 +75,3 @@ export function toPetmate (screens: Screen[], charset = 'upper'): Petmate {
 export function reverse (petmate: Petmate): void {
   petmate.framebufs = petmate.framebufs.reverse()
 }
-

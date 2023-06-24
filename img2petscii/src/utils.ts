@@ -37,7 +37,7 @@ export async function fileExists (filename: string): Promise<boolean> {
   try {
     await access(filename, fs.constants.W_OK)
     return true
-  } catch  {
+  } catch {
     return false
   }
 }
@@ -47,4 +47,9 @@ export function relativePath (filename: string): string {
   const __filename: string = fileURLToPath(import.meta.url)
   const __dirname: string = path.dirname(__filename)
   return path.join(__dirname, filename)
+}
+
+export function filenameWithouthExtension (filename: string) {
+  const extension = path.extname(filename)
+  return path.basename(filename, extension)
 }

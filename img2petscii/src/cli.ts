@@ -2,7 +2,7 @@
 import sharp from 'sharp'
 import { convertImage, supportedExtensions, getBackgroundColor } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { toFilenames, relativePath, fileExists } from './utils.js'
+import { toFilenames, relativePath, fileExists, filenameWithouthExtension } from './utils.js'
 import { readChars, SharpImage, CharSet } from './graphics.js'
 import { Petmate, toPetmate, Screen } from './petmate.js'
 import { writeFile } from 'node:fs/promises'
@@ -19,11 +19,14 @@ const height: number = rows * 8
 async function loadFile (filename: string): Promise<SharpImage> {
   return await sharp(filename).resize(width, height).removeAlpha().raw().toBuffer({ resolveWithObject: true })
 }
+
+
 // convert an image file to a 40x25 array of screencodes
 async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
   console.log(`Input: ${filename}`)
   const image: SharpImage = await loadFile(filename)
-  return convertImage(image, charSet, firstPixelColor, config)
+  const frameId = filenameWithouthExtension(filename)
+  return convertImage(image, charSet, firstPixelColor, frameId, config)
 }
 
 async function loadCharset (config: Config): Promise<CharSet> {
@@ -38,10 +41,10 @@ async function assertFileDoesNotExist (filename: string, config: Config): Promis
   }
 }
 
-async function savePetmate(screens: Screen[], filename: string, config: Config) {
-    const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
-    const petmate: Petmate = toPetmate(screens, petmateCharset)
-    await writeFile(filename, JSON.stringify(petmate))
+async function savePetmate (screens: Screen[], filename: string, config: Config) {
+  const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
+  const petmate: Petmate = toPetmate(screens, petmateCharset)
+  await writeFile(filename, JSON.stringify(petmate))
 }
 
 (async function () {

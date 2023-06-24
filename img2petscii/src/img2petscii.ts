@@ -104,12 +104,12 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 }
 
 // convert an image  to a 40x25 array of screencodes
-export async function convertImage (image: SharpImage, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
+export async function convertImage (image: SharpImage, charSet: CharSet, firstPixelColor: number, id: string, config: Config): Promise<Screen> {
   const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor =
     config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
   const cells: ScreenCell[] = cutIntoTiles(image).map(t => matcher(t, charSet, backgroundColor, config))
-  return { backgroundColor, cells }
+  return { id, backgroundColor, cells }
 }
 
 // get the overall background color from one file, by just getting the first
