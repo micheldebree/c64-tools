@@ -45,7 +45,7 @@ async function loadCharset (config: Config): Promise<CharSet> {
     .default('uppercase')
 
   cli
-    .version('0.0.4')
+    .version('0.0.5')
     .description('Convert images to PETSCII')
     .usage('[options] <image file|folder>')
     .addOption(optionCharset)

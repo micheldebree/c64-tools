@@ -12,7 +12,7 @@ This is a command line tool aimed at developers and graphic artists.
 There is no need to download `img2petscii`, just do this:
 
 - Make sure [Node.js](https://nodejs.org/) 17 or higher is installed
-- `npm install img2petscii`
+- `npm install -g img2petscii`
 
 You now have a command called `img2petscii`
 
