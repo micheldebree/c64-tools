@@ -9,7 +9,7 @@ import { writeFile } from 'node:fs/promises'
 import { Config, saveConfig, loadConfig, CharsetType, fromCliOptions, CliOptions } from './config.js'
 
 // TODO get version from package.json
-const version = '0.0.5'
+const version = '0.0.6'
 const cols = 40
 const rows = 25
 const width: number = cols * 8
