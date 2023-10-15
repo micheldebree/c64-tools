@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-import sharp from 'sharp'
-import { convertImage, supportedExtensions, getBackgroundColor } from './img2petscii.js'
+import sharp, { Sharp } from 'sharp'
+import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { toFilenames, relativePath, fileExists, filenameWithouthExtension } from './utils.js'
-import { readChars, SharpImage, CharSet } from './graphics.js'
-import { Petmate, toPetmate, Screen } from './petmate.js'
+import { fileExists, filenameWithouthExtension, relativePath, toFilenames } from './utils.js'
+import { CharSet, readChars, SharpImage } from './graphics.js'
+import { Petmate, Screen, toPetmate } from './petmate.js'
 import { writeFile } from 'node:fs/promises'
-import { Config, saveConfig, loadConfig, CharsetType, fromCliOptions, CliOptions } from './config.js'
+import { CharsetType, CliOptions, Config, fromCliOptions, loadConfig, saveConfig } from './config.js'
 
 // TODO get version from package.json
 const version = '0.0.6'
@@ -16,15 +16,21 @@ const width: number = cols * 8
 const height: number = rows * 8
 
 // load and scale the image
-async function loadFile (filename: string): Promise<SharpImage> {
-  return await sharp(filename).resize(width, height).removeAlpha().raw().toBuffer({ resolveWithObject: true })
-}
+async function loadFile (filename: string, config: Config): Promise<SharpImage> {
+  let result: Sharp = sharp(filename)
 
+  result = result.resize(width, height).removeAlpha()
+  if (config.mono) {
+    result = result.threshold()
+  }
+
+  return await result.raw().toBuffer({ resolveWithObject: true })
+}
 
 // convert an image file to a 40x25 array of screencodes
 async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
   console.log(`Input: ${filename}`)
-  const image: SharpImage = await loadFile(filename)
+  const image: SharpImage = await loadFile(filename, config)
   const frameId = filenameWithouthExtension(filename)
   return convertImage(image, charSet, firstPixelColor, frameId, config)
 }
@@ -72,6 +78,7 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
     .option('--loadConfig <filename>', 'load config from a json file')
     .option('--saveConfig <filename>', 'saves config to a json file')
     .option('--overwrite', 'force overwrite of existing files')
+    .option('--mono', 'single color mode')
     .parse(process.argv)
 
   const inputName: string = cli.args[0]
@@ -81,17 +88,14 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
     process.exit(1)
   }
 
-  // TODO: check for file override
-
   try {
     const outputName = `${inputName}.petmate`
-
-    const filenames: string[] = await toFilenames(inputName, supportedExtensions)
-    const firstImage: SharpImage = await loadFile(filenames[0])
-    const backgroundColor = await getBackgroundColor(firstImage)
-
     const options: CliOptions = cli.opts()
     let config = fromCliOptions(options)
+
+    const filenames: string[] = await toFilenames(inputName, supportedExtensions)
+    const firstImage: SharpImage = await loadFile(filenames[0], config)
+    const backgroundColor = await getBackgroundColor(firstImage)
 
     await assertFileDoesNotExist(outputName, config)
 

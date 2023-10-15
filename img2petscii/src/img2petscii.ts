@@ -1,26 +1,24 @@
 import {
-  parse8pixelRow,
-  imageCoordinatesToByteOffset,
   cellOffsets,
-  distance,
-  PixelColor,
-  Tile,
-  SharpImage,
+  char2Tile,
   CharSet,
-  char2Tile
+  distance,
+  imageCoordinatesToByteOffset,
+  parse8pixelRow,
+  PixelColor,
+  SharpImage,
+  Tile
 } from './graphics.js'
 import { quantize, quantize2index } from './quantizer.js'
-import { ScreenCell, Screen } from './petmate.js'
-import { Config, MatchType, BackgroundDetectionType } from './config.js'
+import { Screen, ScreenCell } from './petmate.js'
+import { BackgroundDetectionType, Config, MatchType } from './config.js'
 
 interface WeightedScreenCell {
   cell: ScreenCell
   distance: number
 }
 
-export interface MatchFunction {
-  (tile: Tile, chars: CharSet, backgroundColor: number, config: Config): ScreenCell
-}
+export type MatchFunction = (tile: Tile, chars: CharSet, backgroundColor: number, config: Config) => ScreenCell
 
 export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
@@ -104,7 +102,13 @@ function cutIntoTiles (img: SharpImage): Tile[] {
 }
 
 // convert an image  to a 40x25 array of screencodes
-export async function convertImage (image: SharpImage, charSet: CharSet, firstPixelColor: number, id: string, config: Config): Promise<Screen> {
+export async function convertImage (
+  image: SharpImage,
+  charSet: CharSet,
+  firstPixelColor: number,
+  id: string,
+  config: Config
+): Promise<Screen> {
   const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor =
     config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)

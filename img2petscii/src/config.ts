@@ -6,6 +6,7 @@ export interface Config {
   charSetType: CharsetType
   allowedChars: number[]
   overwrite: boolean
+  mono: boolean
 }
 
 export interface CliOptions {
@@ -15,6 +16,7 @@ export interface CliOptions {
   loadConfig: string
   saveConfig: string
   overwrite: boolean
+  mono: boolean
 }
 
 export enum MatchType {
@@ -41,7 +43,8 @@ export const defaultConfig: Config = {
   backgroundDetectionType: BackgroundDetectionType.optimal,
   charSetType: CharsetType.uppercase,
   allowedChars: allChars,
-  overwrite: false
+  overwrite: false,
+  mono: false
 }
 
 export function fromCliOptions (options: CliOptions) {
@@ -50,6 +53,7 @@ export function fromCliOptions (options: CliOptions) {
   result.matchType = options.method
   result.charSetType = options.charset
   result.overwrite = options.overwrite
+  result.mono = options.mono
   return result
 }
 
