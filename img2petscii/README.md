@@ -33,6 +33,9 @@ Options:
                              "optimal", "firstPixel", default: "optimal")
   --loadConfig <filename>    load config from a json file
   --saveConfig <filename>    saves config to a json file
+  --overwrite                force overwrite of existing files
+  --mono                     single color mode
+  --threshold <value>        threshold (0-255) for --mono mode (default: 128)
   -h, --help                 display help for command
 ```
 
@@ -76,6 +79,13 @@ that as background color. This is useful for converting multiple images to an
 animation, where the `optimal` setting might decide on different background
 colors for different frames in the animation. The `firstPixel` option always
 uses one background color for the whole animation.
+
+    --mono
+    --threshold
+
+Monochrome mode. First converts input to black and white. Use `--threshold` to
+change the quantization threshold. When `--threshold` is not supplied, a
+threshold of 128 is used.
 
     --saveConfig <filename>
     --loadConfig <filename>
