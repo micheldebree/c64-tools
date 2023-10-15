@@ -1,21 +1,19 @@
 #!/bin/bash
 set -e
+SID=$1
+LENGTH=$2
+
 . ./jsidplay.inc.sh
-if [ "$#" -ne 2 ]; then
+
+if [ -z "${SID}" ]; then
   echo "Split SID tunes into three separate WAV tracks"
-  echo "USAGE: $0 <SID file> <song length>"
+  echo "USAGE: $0 <SID file> [length]"
   exit 0
 fi
 
-JSIDPLAY_VERSION=4.6
-JSIDPLAY="java -jar ./jsidplay2-${JSIDPLAY_VERSION}-mac/jsidplay2-console-${JSIDPLAY_VERSION}.jar
--n true \
--e RESIDFP \
--f HIGH \
---sampling RESAMPLE \
---fadeOut 00:03"
-
-LENGTH=$2
-${JSIDPLAY} --muteVoice2 true --muteVoice3 true --audio WAV --single true --defaultLength "${LENGTH}" --recordingFilename "$1-v1.wav" "$1"
-${JSIDPLAY} --muteVoice1 true --muteVoice3 true --audio WAV --single true --defaultLength "${LENGTH}" --recordingFilename "$1-v2.wav" "$1"
-${JSIDPLAY} --muteVoice1 true --muteVoice2 true --audio WAV --single true --defaultLength "${LENGTH}" --recordingFilename "$1-v3.wav" "$1"
+${JSIDPLAY} --muteVoice2 true --muteVoice3 true --audio WAV --single true "${SID}"
+mv "${BASENAME}.wav" "${BASENAME}-track_1.wav"
+${JSIDPLAY} --muteVoice1 true --muteVoice3 true --audio WAV --single true "${SID}"
+mv "${BASENAME}.wav" "${BASENAME}-track_2.wav"
+${JSIDPLAY} --muteVoice1 true --muteVoice2 true --audio WAV --single true "${SID}"
+mv "${BASENAME}.wav" "${BASENAME}-track_3.wav"

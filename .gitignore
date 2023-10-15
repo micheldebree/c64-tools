@@ -2,3 +2,8 @@ built
 node_modules
 .DS_Store
 .idea
+jsidplay2*/
+*.sid
+*.wav
+*.mp3
+*.m4a
