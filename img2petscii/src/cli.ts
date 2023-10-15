@@ -21,7 +21,7 @@ async function loadFile (filename: string, config: Config): Promise<SharpImage> 
 
   result = result.resize(width, height).removeAlpha()
   if (config.mono) {
-    result = result.threshold()
+    result = result.threshold(config.threshold)
   }
 
   return await result.raw().toBuffer({ resolveWithObject: true })
@@ -68,6 +68,8 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
     .choices(['uppercase', 'lowercase'])
     .default('uppercase')
 
+  const optionThreshold = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
+
   cli
     .version(version)
     .description('Convert images to PETSCII')
@@ -79,6 +81,7 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
     .option('--saveConfig <filename>', 'saves config to a json file')
     .option('--overwrite', 'force overwrite of existing files')
     .option('--mono', 'single color mode')
+    .addOption(optionThreshold)
     .parse(process.argv)
 
   const inputName: string = cli.args[0]
