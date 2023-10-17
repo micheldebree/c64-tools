@@ -23,7 +23,7 @@ export type MatchFunction = (tile: Tile, chars: CharSet, backgroundColor: number
 export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
 function mostOccurringColorIndex(pixels: number[]): number {
-  const counts: number[] = Array(16).fill(0)
+  const counts: number[] = Array<number>(16).fill(0)
   pixels.forEach((p: number) => counts[p]++)
   return counts
     .map((c: number, i: number) => [i, c])
@@ -107,13 +107,7 @@ function cutIntoTiles(img: SharpImage): Tile[] {
 }
 
 // convert an image  to a 40x25 array of screen codes
-export async function convertImage(
-  image: SharpImage,
-  charSet: CharSet,
-  firstPixelColor: number,
-  id: string,
-  config: Config
-): Promise<Screen> {
+export function convertImage(image: SharpImage, charSet: CharSet, firstPixelColor: number, id: string, config: Config): Screen {
   const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor: number =
     config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
@@ -123,6 +117,6 @@ export async function convertImage(
 
 // get the overall background color from one file, by just getting the first
 // (quantized) pixel
-export async function getBackgroundColor(image: SharpImage): Promise<number> {
+export function getBackgroundColor(image: SharpImage): number {
   return quantize(image)[0]
 }

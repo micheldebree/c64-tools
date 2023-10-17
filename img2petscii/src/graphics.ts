@@ -109,7 +109,7 @@ export async function createImage(width: number, height: number): Promise<SharpI
   }).toBuffer({ resolveWithObject: true })
 }
 
-export async function toSharp(image: SharpImage): Promise<Sharp> {
+export function toSharp(image: SharpImage): Sharp {
   return sharp(image.data, {
     raw: {
       width: image.info.width,

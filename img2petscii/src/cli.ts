@@ -48,7 +48,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
   await writeFile(filename, JSON.stringify(petmate))
 }
 
-;(async function (): Promise<void> {
+await (async function (): Promise<void> {
   const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
     .choices(['optimal', 'firstPixel'])
     .default('optimal')
@@ -91,7 +91,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
     const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
-    const backgroundColor: number = await getBackgroundColor(firstImage)
+    const backgroundColor: number = getBackgroundColor(firstImage)
 
     if (options.loadConfig) {
       config = await loadConfig(options.loadConfig)
@@ -114,7 +114,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
 
     console.log(`Output: ${outputName}`)
   } catch (err) {
-    console.log(`\nERROR: ${err.message}.\n`)
+    console.log(`\nERROR: ${err}.\n`)
     cli.help()
     process.exit(1)
   }
