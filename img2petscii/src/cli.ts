@@ -2,11 +2,13 @@
 import sharp, { Sharp } from 'sharp'
 import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { fileExists, filenameWithouthExtension, relativePath, toFilenames } from './utils.js'
-import { CharSet, readChars, SharpImage } from './graphics.js'
-import { Petmate, Screen, toPetmate } from './petmate.js'
+import { checkOverwrite, createOutputname, filenameWithouthExtension, relativePath, toFilenames } from './utils.js'
+import { SharpImage } from './graphics.js'
+import { Petmate, toPetmate } from './petmate.js'
+import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
 import { CharsetType, CliOptions, Config, fromCliOptions, loadConfig, saveConfig } from './config.js'
+import { CharSet, readChars } from './charset.js'
 
 // TODO get version from package.json
 const version = '0.0.7'
@@ -40,13 +42,6 @@ async function loadCharset(config: Config): Promise<CharSet> {
   return await readChars(relativePath('./characters.901225-01.bin'), offset)
 }
 
-async function assertFileDoesNotExist(filename: string, config: Config): Promise<void> {
-  const exists: boolean = await fileExists(filename)
-  if (exists && !config.overwrite) {
-    throw new Error(`Output file ${filename} already exists. Use --overwrite to force overwriting.`)
-  }
-}
-
 async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
   const petmateCharset: 'lower' | 'upper' = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
   const petmate: Petmate = toPetmate(screens, petmateCharset)
@@ -54,8 +49,6 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
 }
 
 ;(async function (): Promise<void> {
-  const cli: Command = new Command()
-
   const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
     .choices(['optimal', 'firstPixel'])
     .default('optimal')
@@ -70,7 +63,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
 
   const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
 
-  cli
+  const cli: Command = new Command()
     .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <file|folder>')
@@ -92,21 +85,19 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
   }
 
   try {
-    const outputName: string = `${inputName}.petmate`
     const options: CliOptions = cli.opts()
     let config: Config = fromCliOptions(options)
 
+    const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
     const backgroundColor: number = await getBackgroundColor(firstImage)
-
-    await assertFileDoesNotExist(outputName, config)
 
     if (options.loadConfig) {
       config = await loadConfig(options.loadConfig)
     }
     if (options.saveConfig) {
-      await assertFileDoesNotExist(options.saveConfig, config)
+      await checkOverwrite(options.saveConfig, config.overwrite)
     }
 
     const charSet: CharSet = await loadCharset(config)

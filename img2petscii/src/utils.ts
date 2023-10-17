@@ -3,7 +3,6 @@ import fs, { Stats } from 'fs'
 import { fileURLToPath } from 'url'
 import path from 'path'
 
-// Aap
 // Return the filename, or return the files in the folder if a folder is supplied
 // inputName: name of a file or a folder
 // supportedExtensions: array of strings of extensions that are supported
@@ -48,7 +47,29 @@ export function relativePath(filename: string): string {
   return path.join(__dirname, filename)
 }
 
-export function filenameWithouthExtension(filename: string) {
-  const extension: string = path.extname(filename)
-  return path.basename(filename, extension)
+export function filenameWithouthExtension(filename: string): string {
+  return path.basename(filename, path.extname(filename))
+}
+
+function changeExtension(filename: string, extension: string): string {
+  const currentExtension: string = path.extname(filename)
+  if (currentExtension.toLowerCase() === extension.toLowerCase()) {
+    throw new Error(`File already has extension ${extension}`)
+  }
+  return `${path.basename(filename, currentExtension)}.${extension}`
+}
+
+export async function checkOverwrite(filename: string, mayOverwrite: boolean): Promise<void> {
+  if (!mayOverwrite) {
+    const exists: boolean = await fileExists(filename)
+    if (exists) {
+      throw new Error(`Output file ${filename} already exists. Use --overwrite to force overwriting.`)
+    }
+  }
+}
+
+export async function createOutputname(inputFilename: string, outputExtension: string, mayOverwrite: boolean): Promise<string> {
+  const result: string = changeExtension(inputFilename, outputExtension)
+  await checkOverwrite(result, mayOverwrite)
+  return result
 }

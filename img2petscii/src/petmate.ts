@@ -1,17 +1,7 @@
+import { Screen, ScreenCell } from './model.js'
+
 const cols = 40
 const rows = 25
-
-export interface ScreenCell {
-  code: number
-  color: number
-}
-
-// TODO: this is not petmate specific?
-export interface Screen {
-  id: string
-  backgroundColor: number
-  cells: ScreenCell[]
-}
 
 export interface FrameBuf {
   width: number
