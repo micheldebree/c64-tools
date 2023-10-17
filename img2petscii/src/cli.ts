@@ -16,7 +16,7 @@ const width: number = cols * 8
 const height: number = rows * 8
 
 // load and scale the image
-async function loadFile (filename: string, config: Config): Promise<SharpImage> {
+async function loadFile(filename: string, config: Config): Promise<SharpImage> {
   let result: Sharp = sharp(filename)
 
   result = result.resize(width, height).removeAlpha()
@@ -28,52 +28,52 @@ async function loadFile (filename: string, config: Config): Promise<SharpImage> 
 }
 
 // convert an image file to a 40x25 array of screencodes
-async function convertFile (filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
+async function convertFile(filename: string, charSet: CharSet, firstPixelColor: number, config: Config): Promise<Screen> {
   console.log(`Input: ${filename}`)
   const image: SharpImage = await loadFile(filename, config)
-  const frameId = filenameWithouthExtension(filename)
+  const frameId: string = filenameWithouthExtension(filename)
   return convertImage(image, charSet, firstPixelColor, frameId, config)
 }
 
-async function loadCharset (config: Config): Promise<CharSet> {
+async function loadCharset(config: Config): Promise<CharSet> {
   const offset: number = config.charSetType === CharsetType.lowercase ? 256 : 0
   return await readChars(relativePath('./characters.901225-01.bin'), offset)
 }
 
-async function assertFileDoesNotExist (filename: string, config: Config): Promise<void> {
-  const exists = await fileExists(filename)
+async function assertFileDoesNotExist(filename: string, config: Config): Promise<void> {
+  const exists: boolean = await fileExists(filename)
   if (exists && !config.overwrite) {
     throw new Error(`Output file ${filename} already exists. Use --overwrite to force overwriting.`)
   }
 }
 
-async function savePetmate (screens: Screen[], filename: string, config: Config) {
-  const petmateCharset = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
+async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
+  const petmateCharset: 'lower' | 'upper' = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
   const petmate: Petmate = toPetmate(screens, petmateCharset)
   await writeFile(filename, JSON.stringify(petmate))
 }
 
-(async function () {
-  const cli = new Command()
+;(async function (): Promise<void> {
+  const cli: Command = new Command()
 
-  const optionBackground = new Option('-b, --background <method>', 'method for choosing background color')
+  const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
     .choices(['optimal', 'firstPixel'])
     .default('optimal')
 
-  const optionMethod = new Option('-m, --method <method>', 'method for matching PETSCII characters')
+  const optionMethod: Option = new Option('-m, --method <method>', 'method for matching PETSCII characters')
     .choices(['slow', 'fast'])
     .default('slow')
 
-  const optionCharset = new Option('-c, --charset <name>', 'which ROM character set to use')
+  const optionCharset: Option = new Option('-c, --charset <name>', 'which ROM character set to use')
     .choices(['uppercase', 'lowercase'])
     .default('uppercase')
 
-  const optionThreshold = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
+  const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
 
   cli
     .version(version)
     .description('Convert images to PETSCII')
-    .usage('[options] <image file|folder>')
+    .usage('[options] <file|folder>')
     .addOption(optionCharset)
     .addOption(optionMethod)
     .addOption(optionBackground)
@@ -92,13 +92,13 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
   }
 
   try {
-    const outputName = `${inputName}.petmate`
+    const outputName: string = `${inputName}.petmate`
     const options: CliOptions = cli.opts()
-    let config = fromCliOptions(options)
+    let config: Config = fromCliOptions(options)
 
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
-    const backgroundColor = await getBackgroundColor(firstImage)
+    const backgroundColor: number = await getBackgroundColor(firstImage)
 
     await assertFileDoesNotExist(outputName, config)
 
@@ -110,7 +110,7 @@ async function savePetmate (screens: Screen[], filename: string, config: Config)
     }
 
     const charSet: CharSet = await loadCharset(config)
-    const screens: Screen[] = await Promise.all(filenames.map(async f => await convertFile(f, charSet, backgroundColor, config)))
+    const screens: Screen[] = await Promise.all(filenames.map((f: string) => convertFile(f, charSet, backgroundColor, config)))
 
     await savePetmate(screens, outputName, config)
 

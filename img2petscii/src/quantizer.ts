@@ -1,4 +1,4 @@
-import { distance, SharpImage, PixelColor } from './graphics.js'
+import { distance, PixelColor, SharpImage } from './graphics.js'
 
 // colodore
 export const palette: PixelColor[] = [
@@ -21,16 +21,16 @@ export const palette: PixelColor[] = [
 ]
 
 // map an [r, g, b] color to the index of the closest color in the palette
-export function quantize2index (color: PixelColor): number {
+export function quantize2index(color: PixelColor): number {
   return palette
-    .map((paletteColor, i) => [i, distance(color, paletteColor)])
-    .reduce((acc, current) => (current[1] < acc[1] ? current : acc), [0, Number.POSITIVE_INFINITY])[0]
+    .map((paletteColor: PixelColor, i: number) => [i, distance(color, paletteColor)])
+    .reduce((acc: number[], current: number[]): number[] => (current[1] < acc[1] ? current : acc), [0, Number.POSITIVE_INFINITY])[0]
 }
 
 // unflatten image data by converting it to an array of 320x200 pixels of type
 // [r, g, b]
-function unflatten (img: SharpImage): PixelColor[] {
-  let i = 0
+function unflatten(img: SharpImage): PixelColor[] {
+  let i: number = 0
   const result: PixelColor[] = []
   while (i < img.data.length) {
     // assume 3 channels
@@ -41,6 +41,6 @@ function unflatten (img: SharpImage): PixelColor[] {
 }
 
 // return an index image (320 x 200 palette indices) from a raw sharp image
-export function quantize (img: SharpImage): number[] {
-  return unflatten(img).map(p => quantize2index(p))
+export function quantize(img: SharpImage): number[] {
+  return unflatten(img).map((p: PixelColor) => quantize2index(p))
 }

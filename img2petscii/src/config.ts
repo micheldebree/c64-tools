@@ -38,7 +38,7 @@ export enum CharsetType {
 
 const allChars: number[] = Array(255)
   .fill(0)
-  .map((_c, i) => i)
+  .map((_c, i: number) => i)
 
 export const defaultConfig: Config = {
   matchType: MatchType.slow,
@@ -50,8 +50,8 @@ export const defaultConfig: Config = {
   threshold: 128
 }
 
-export function fromCliOptions (options: CliOptions) {
-  const result = defaultConfig
+export function fromCliOptions(options: CliOptions): Config {
+  const result: Config = defaultConfig
   result.backgroundDetectionType = options.background
   result.matchType = options.method
   result.charSetType = options.charset
@@ -60,17 +60,17 @@ export function fromCliOptions (options: CliOptions) {
   result.threshold = parseInt(options.threshold)
 
   if (result.threshold < 0 || result.threshold > 255) {
-    throw new Error("Value for --threshold should be between 0 and 255")
+    throw new Error('Value for --threshold should be between 0 and 255')
   }
 
   return result
 }
 
-export async function saveConfig (config: Config, filename: string): Promise<void> {
+export async function saveConfig(config: Config, filename: string): Promise<void> {
   await writeFile(filename, JSON.stringify(config))
 }
 
-export async function loadConfig (filename: string): Promise<Config> {
+export async function loadConfig(filename: string): Promise<Config> {
   const buf: Buffer = await readFile(filename)
   return JSON.parse(buf.toString())
 }
