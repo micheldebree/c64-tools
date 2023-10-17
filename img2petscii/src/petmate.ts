@@ -30,7 +30,7 @@ export interface Petmate {
   framebufs: FrameBuf[]
 }
 
-export function fromJSON (json: string): Petmate {
+export function fromJSON(json: string): Petmate {
   const content: Petmate = JSON.parse(json)
 
   if (content.version !== 2) {
@@ -39,13 +39,13 @@ export function fromJSON (json: string): Petmate {
   return content
 }
 
-function toFramebuf (screen: Screen, charset = 'upper'): FrameBuf {
+function toFramebuf(screen: Screen, charset: string = 'upper'): FrameBuf {
   const { backgroundColor, cells } = screen
 
   const framebuf: ScreenCell[][] = []
-  for (let y = 0; y < rows; y++) {
+  for (let y: number = 0; y < rows; y++) {
     const row: ScreenCell[] = []
-    for (let x = 0; x < cols; x++) {
+    for (let x: number = 0; x < cols; x++) {
       row.push(cells[y * cols + x])
     }
     framebuf.push(row)
@@ -62,16 +62,12 @@ function toFramebuf (screen: Screen, charset = 'upper'): FrameBuf {
   }
 }
 
-export function toPetmate (screens: Screen[], charset = 'upper'): Petmate {
-  const framebufs: FrameBuf[] = screens.map(screen => toFramebuf(screen, charset))
+export function toPetmate(screens: Screen[], charset: string = 'upper'): Petmate {
+  const framebufs: FrameBuf[] = screens.map((screen: Screen) => toFramebuf(screen, charset))
   const screenNumbers: number[] = Array.from(Array(screens.length).keys())
   return {
     version: 2,
     screens: screenNumbers,
     framebufs
   }
-}
-
-export function reverse (petmate: Petmate): void {
-  petmate.framebufs = petmate.framebufs.reverse()
 }
