@@ -1,5 +1,6 @@
-import { byte2Pixels, Char, CharSet, createImage, mapByteOrder, PixelColor, SharpImage, toSharp } from './graphics.js'
+import { byte2Pixels, createImage, mapByteOrder, PixelColor, SharpImage, toSharp } from './graphics.js'
 import { Sharp } from 'sharp'
+import { Char, CharSet } from './charset.js'
 
 export async function renderCharSet(chars: CharSet): Promise<Sharp> {
   const bytesPerRow: number = 32

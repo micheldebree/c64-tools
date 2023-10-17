@@ -1,19 +1,15 @@
-import { readFile } from 'node:fs/promises'
 import sharp, { OutputInfo, Sharp } from 'sharp'
 import { palette } from './quantizer.js'
+import { bytesPerChar, Char } from './charset.js'
 
 export type Byte = number
-export type Char = Byte[] // 8 bytes
 export type PixelColor = Byte[] // TODO: make r, g, b
-export type CharSet = Char[]
 export type Tile = PixelColor[][] // 8 x 8 pixels
 
 export interface SharpImage {
   data: Buffer
   info: OutputInfo
 }
-
-const bytesPerChar = 8
 
 const mask: Byte[] = [0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001]
 
@@ -22,13 +18,6 @@ export function charOffsets(charData: Byte[]): number[] {
   return Array(charData.length / bytesPerChar)
     .fill(0)
     .map((_v, i: number) => i * bytesPerChar)
-}
-
-// callback (index, array of 8 bytes)
-export function forEachCharIn(charData: Byte[], callback: (index: number, charData: Byte[]) => void): void {
-  charOffsets(charData).forEach((offset: number, i: number): void => {
-    callback(i, charData.slice(offset, offset + bytesPerChar))
-  })
 }
 
 // the number of bits set to 1 in a Byte
@@ -98,15 +87,6 @@ export function mapByteOrder(offset: number, bytesPerRow: number): number {
   const x: number = Math.floor(offset / bytesPerChar) % bytesPerRow
   const y: number = Math.floor(offset / (bytesPerRow * bytesPerChar)) * bytesPerChar + (offset % bytesPerChar)
   return y * bytesPerRow + x
-}
-
-// read 256 characters from a binary character set
-export async function readChars(filename: string, offset: number = 0): Promise<CharSet> {
-  const buffer: Buffer = await readFile(filename)
-  const charData: Byte[] = Array.from(buffer).slice(offset * 8, (offset + 256) * 8)
-  const chars: CharSet = []
-  forEachCharIn(charData, (_i: number, charBytes: Byte[]) => chars.push(charBytes))
-  return chars
 }
 
 // convert a Char (8 bytes) to a colored tile (8 x 8 [r, g, b] pixels)

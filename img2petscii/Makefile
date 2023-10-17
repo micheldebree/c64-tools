@@ -25,3 +25,6 @@ clean:
 fix:
 	./node_modules/.bin/eslint --fix ./src/*.ts
 
+test: all
+	node . --overwrite -m fast images.jpg
+
