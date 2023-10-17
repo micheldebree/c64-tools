@@ -24,7 +24,8 @@ export async function toFilenames(fileOrFolderName: string, supportedExtensions:
       .sort()
       .map((f: string) => path.join(fileOrFolderName, f))
     if (filtered.length === 0) {
-      throw new Error(`No files of type ${supportedExtensions} found in ${fileOrFolderName}`)
+      const extensionsSeparated = supportedExtensions.reduce((p: string, c: string): string => `${p},${c}`)
+      throw new Error(`No files of type ${extensionsSeparated} found in ${fileOrFolderName}`)
     }
     return filtered
   }

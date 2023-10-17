@@ -6,7 +6,7 @@ import { Sharp } from 'sharp'
 
 const version = '0.0.1'
 
-;(async function (): Promise<void> {
+await (async function (): Promise<void> {
   const cli: Command = new Command()
     .version(version)
     .description('Render a charset to an image')
@@ -23,6 +23,6 @@ const version = '0.0.1'
   const charset: CharSet = await readChars(inputName)
   const image: Sharp = await renderCharSet(charset)
 
-  image.toFile(outputName)
+  await image.toFile(outputName)
   console.log(outputName)
 })()
