@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { Command } from 'commander'
 import { createOutputname } from './utils.js'
 import { CharSet, readChars } from './charset.js'
@@ -16,7 +17,6 @@ await (async function (): Promise<void> {
   const inputName: string = cli.args[0]
   if (inputName === undefined) {
     cli.help()
-    process.exit(1)
   }
 
   const outputName: string = await createOutputname(inputName, 'png', false)

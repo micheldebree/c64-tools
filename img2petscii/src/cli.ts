@@ -81,7 +81,6 @@ await (async function (): Promise<void> {
 
   if (inputName === undefined) {
     cli.help()
-    process.exit(1)
   }
 
   try {
@@ -109,13 +108,9 @@ await (async function (): Promise<void> {
       await saveConfig(config, options.saveConfig)
     }
 
-    // const charsetImg: Sharp = await renderCharSet(charSet)
-    // charsetImg.toFile('test.png')
-
     console.log(`Output: ${outputName}`)
   } catch (err) {
     console.log(`\nERROR: ${err}.\n`)
     cli.help()
-    process.exit(1)
   }
 })()
