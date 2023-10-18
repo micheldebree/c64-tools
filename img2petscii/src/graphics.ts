@@ -14,12 +14,6 @@ export interface SharpImage {
 const mask: Byte[] = [0b10000000, 0b01000000, 0b00100000, 0b00010000, 0b00001000, 0b00000100, 0b00000010, 0b00000001]
 
 // array of offsets for each Char in charData
-export function charOffsets(charData: Byte[]): number[] {
-  return Array(charData.length / bytesPerChar)
-    .fill(0)
-    .map((_v, i: number) => i * bytesPerChar)
-}
-
 // the number of bits set to 1 in a Byte
 export function countBits(b: Byte): number {
   return mask.filter((m: number): boolean => (b & m) !== 0).length

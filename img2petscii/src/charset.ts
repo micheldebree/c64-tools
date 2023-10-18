@@ -1,16 +1,20 @@
-import { Byte, charOffsets } from './graphics.js'
+import { Byte } from './graphics.js'
 import { readFile } from 'node:fs/promises'
 
-export const bytesPerChar = 8
+export const bytesPerChar: number = 8
 export type CharSet = Char[]
 
 export type Char = Byte[] // 8 bytes
 
+function charOffsets(charData: Byte[]): number[] {
+  return Array(charData.length / bytesPerChar)
+    .fill(0)
+    .map((_v, i: number) => i * bytesPerChar)
+}
+
 // callback (index, array of 8 bytes)
 export function forEachCharIn(charData: Byte[], callback: (index: number, charData: Byte[]) => void): void {
-  charOffsets(charData).forEach((offset: number, i: number): void => {
-    callback(i, charData.slice(offset, offset + bytesPerChar))
-  })
+  charOffsets(charData).forEach((offset: number, i: number): void => callback(i, charData.slice(offset, offset + bytesPerChar)))
 }
 
 // read 256 characters from a binary character set
