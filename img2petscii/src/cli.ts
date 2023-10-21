@@ -2,18 +2,28 @@
 import sharp, { Sharp } from 'sharp'
 import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { checkOverwrite, createOutputname, filenameWithouthExtension, relativePath, toFilenames } from './utils.js'
+import { checkOverwrite, createOutputname, filenameWithouthExtension, toFilenames } from './utils.js'
 import { SharpImage } from './graphics.js'
-import { Petmate, toPetmate } from './petmate.js'
+import { Petmate, PetmateCharset, toPetmate } from './petmate.js'
 import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
-import { CharsetType, CliOptions, Config, fromCliOptions, loadConfig, saveConfig } from './config.js'
-import { CharSet, readChars } from './charset.js'
+import {
+  BackgroundDetectionType,
+  CliOptions,
+  Config,
+  FormatType,
+  fromCliOptions,
+  loadConfig,
+  MatchType,
+  saveConfig
+} from './config.js'
+import { CharSet, ROMCharsetType, readRomCharSet } from './charset.js'
+import { saveScreens } from './png.js'
 
 // TODO get version from package.json
 const version = '0.0.7'
-const cols = 40
-const rows = 25
+const cols: number = 40
+const rows: number = 25
 const width: number = cols * 8
 const height: number = rows * 8
 
@@ -37,36 +47,37 @@ async function convertFile(filename: string, charSet: CharSet, firstPixelColor: 
   return convertImage(image, charSet, firstPixelColor, frameId, config)
 }
 
-async function loadCharset(config: Config): Promise<CharSet> {
-  const offset: number = config.charSetType === CharsetType.lowercase ? 256 : 0
-  return await readChars(relativePath('./characters.901225-01.bin'), offset)
-}
-
 async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
-  const petmateCharset: 'lower' | 'upper' = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
+  const petmateCharset: PetmateCharset =
+    config.charSetType === ROMCharsetType.lowercase ? PetmateCharset.lowercase : PetmateCharset.uppercase
   const petmate: Petmate = toPetmate(screens, petmateCharset)
   await writeFile(filename, JSON.stringify(petmate))
 }
 
 await (async function (): Promise<void> {
   const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
-    .choices(['optimal', 'firstPixel'])
-    .default('optimal')
+    .choices([BackgroundDetectionType.optimal, BackgroundDetectionType.firstPixel])
+    .default(BackgroundDetectionType.optimal)
 
   const optionMethod: Option = new Option('-m, --method <method>', 'method for matching PETSCII characters')
-    .choices(['slow', 'fast'])
-    .default('slow')
+    .choices([MatchType.slow, MatchType.fast])
+    .default(MatchType.slow)
 
   const optionCharset: Option = new Option('-c, --charset <name>', 'which ROM character set to use')
-    .choices(['uppercase', 'lowercase'])
-    .default('uppercase')
+    .choices([ROMCharsetType.uppercase, ROMCharsetType.lowercase])
+    .default(ROMCharsetType.uppercase)
 
   const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
+
+  const optionFormat: Option = new Option('-f, --format <name>', 'output format')
+    .choices([FormatType.petmate, FormatType.png])
+    .default(FormatType.petmate)
 
   const cli: Command = new Command()
     .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <file|folder>')
+    .addOption(optionFormat)
     .addOption(optionCharset)
     .addOption(optionMethod)
     .addOption(optionBackground)
@@ -87,7 +98,6 @@ await (async function (): Promise<void> {
     const options: CliOptions = cli.opts()
     let config: Config = fromCliOptions(options)
 
-    const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
     const backgroundColor: number = getBackgroundColor(firstImage)
@@ -99,16 +109,23 @@ await (async function (): Promise<void> {
       await checkOverwrite(options.saveConfig, config.overwrite)
     }
 
-    const charSet: CharSet = await loadCharset(config)
+    const charSet: CharSet = await readRomCharSet(config.charSetType)
     const screens: Screen[] = await Promise.all(filenames.map((f: string) => convertFile(f, charSet, backgroundColor, config)))
 
-    await savePetmate(screens, outputName, config)
+    if (config.format == FormatType.petmate) {
+      const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
+      await savePetmate(screens, outputName, config)
+      console.log(`Output: ${outputName}`)
+    }
+
+    if (config.format == FormatType.png) {
+      const basename: string = filenameWithouthExtension(inputName)
+      await saveScreens(screens, charSet, basename, config.overwrite)
+    }
 
     if (options.saveConfig) {
       await saveConfig(config, options.saveConfig)
     }
-
-    console.log(`Output: ${outputName}`)
   } catch (err) {
     console.log(`\nERROR: ${err}.\n`)
     cli.help()

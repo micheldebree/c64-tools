@@ -1,7 +1,7 @@
 import { Screen, ScreenCell } from './model.js'
 
-const cols = 40
-const rows = 25
+const cols: number = 40
+const rows: number = 25
 
 export interface FrameBuf {
   width: number
@@ -20,6 +20,11 @@ export interface Petmate {
   framebufs: FrameBuf[]
 }
 
+export enum PetmateCharset {
+  uppercase = 'upper',
+  lowercase = 'lower'
+}
+
 export function fromJSON(json: string): Petmate {
   const content: Petmate = <Petmate>JSON.parse(json)
 
@@ -29,7 +34,7 @@ export function fromJSON(json: string): Petmate {
   return content
 }
 
-function toFramebuf(screen: Screen, charset: string = 'upper'): FrameBuf {
+function toFramebuf(screen: Screen, charset: PetmateCharset = PetmateCharset.uppercase): FrameBuf {
   const { backgroundColor, cells } = screen
 
   const framebuf: ScreenCell[][] = []
@@ -52,7 +57,19 @@ function toFramebuf(screen: Screen, charset: string = 'upper'): FrameBuf {
   }
 }
 
-export function toPetmate(screens: Screen[], charset: string = 'upper'): Petmate {
+export function toScreens(petmate: Petmate): Screen[] {
+  return petmate.framebufs.map((frame: FrameBuf) => toScreen(frame))
+}
+
+export function toScreen(frame: FrameBuf): Screen {
+  const id: string = frame.name
+  const backgroundColor: number = frame.backgroundColor
+  const cells: ScreenCell[] = frame.framebuf.flat()
+
+  return { id, backgroundColor, cells }
+}
+
+export function toPetmate(screens: Screen[], charset: PetmateCharset = PetmateCharset.uppercase): Petmate {
   const framebufs: FrameBuf[] = screens.map((screen: Screen) => toFramebuf(screen, charset))
   const screenNumbers: number[] = Array.from(Array(screens.length).keys())
   return {

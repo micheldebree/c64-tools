@@ -1,24 +1,27 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { ROMCharsetType } from './charset.js'
 
 export interface Config {
   matchType: MatchType
   backgroundDetectionType: BackgroundDetectionType
-  charSetType: CharsetType
+  charSetType: ROMCharsetType
   allowedChars: number[]
   overwrite: boolean
   mono: boolean
   threshold: number
+  format: FormatType
 }
 
 export interface CliOptions {
   background: BackgroundDetectionType
   method: MatchType
-  charset: CharsetType
+  charset: ROMCharsetType
   loadConfig: string
   saveConfig: string
   overwrite: boolean
   mono: boolean
   threshold: string
+  format: FormatType
 }
 
 export enum MatchType {
@@ -31,9 +34,9 @@ export enum BackgroundDetectionType {
   firstPixel = 'firstPixel'
 }
 
-export enum CharsetType {
-  uppercase = 'uppercase',
-  lowercase = 'lowercase'
+export enum FormatType {
+  petmate = 'petmate',
+  png = 'png'
 }
 
 const allChars: number[] = Array(255)
@@ -43,11 +46,12 @@ const allChars: number[] = Array(255)
 export const defaultConfig: Config = {
   matchType: MatchType.slow,
   backgroundDetectionType: BackgroundDetectionType.optimal,
-  charSetType: CharsetType.uppercase,
+  charSetType: ROMCharsetType.uppercase,
   allowedChars: allChars,
   overwrite: false,
   mono: false,
-  threshold: 128
+  threshold: 128,
+  format: FormatType.petmate
 }
 
 export function fromCliOptions(options: CliOptions): Config {
@@ -58,6 +62,7 @@ export function fromCliOptions(options: CliOptions): Config {
   result.overwrite = options.overwrite
   result.mono = options.mono
   result.threshold = parseInt(options.threshold)
+  result.format = options.format
 
   if (result.threshold < 0 || result.threshold > 255) {
     throw new Error('Value for --threshold should be between 0 and 255')
