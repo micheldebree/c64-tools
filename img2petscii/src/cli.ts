@@ -9,7 +9,6 @@ import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
 import {
   BackgroundDetectionType,
-  CharsetType,
   CliOptions,
   Config,
   FormatType,
@@ -18,7 +17,7 @@ import {
   MatchType,
   saveConfig
 } from './config.js'
-import { CharSet, readRomCharSet } from './charset.js'
+import { CharSet, ROMCharsetType, readRomCharSet } from './charset.js'
 import { saveScreens } from './png.js'
 
 // TODO get version from package.json
@@ -48,14 +47,9 @@ async function convertFile(filename: string, charSet: CharSet, firstPixelColor: 
   return convertImage(image, charSet, firstPixelColor, frameId, config)
 }
 
-async function loadCharset(config: Config): Promise<CharSet> {
-  const lowercase: boolean = config.charSetType === CharsetType.lowercase
-  return await readRomCharSet(lowercase)
-}
-
 async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
   const petmateCharset: PetmateCharset =
-    config.charSetType === CharsetType.lowercase ? PetmateCharset.lowercase : PetmateCharset.uppercase
+    config.charSetType === ROMCharsetType.lowercase ? PetmateCharset.lowercase : PetmateCharset.uppercase
   const petmate: Petmate = toPetmate(screens, petmateCharset)
   await writeFile(filename, JSON.stringify(petmate))
 }
@@ -70,12 +64,12 @@ await (async function (): Promise<void> {
     .default(MatchType.fast)
 
   const optionCharset: Option = new Option('-c, --charset <name>', 'which ROM character set to use')
-    .choices([CharsetType.uppercase, CharsetType.lowercase])
-    .default(CharsetType.uppercase)
+    .choices([ROMCharsetType.uppercase, ROMCharsetType.lowercase])
+    .default(ROMCharsetType.uppercase)
 
   const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
 
-  const optionFormat: Option = new Option('--format <name>', 'output format')
+  const optionFormat: Option = new Option('-f, --format <name>', 'output format')
     .choices([FormatType.petmate, FormatType.png])
     .default(FormatType.petmate)
 
@@ -115,7 +109,7 @@ await (async function (): Promise<void> {
       await checkOverwrite(options.saveConfig, config.overwrite)
     }
 
-    const charSet: CharSet = await loadCharset(config)
+    const charSet: CharSet = await readRomCharSet(config.charSetType)
     const screens: Screen[] = await Promise.all(filenames.map((f: string) => convertFile(f, charSet, backgroundColor, config)))
 
     if (config.format == FormatType.petmate) {

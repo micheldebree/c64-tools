@@ -19,16 +19,18 @@ You now have a command called `img2petscii`
 ## Usage
 
 ```
-Usage: img2petscii [options] <image file|folder>
+Usage: img2petscii [options] <file|folder>
 
 Convert images to PETSCII
 
 Options:
   -V, --version              output the version number
+  -f, --format <name>        output format (choices: "petmate", "png", default:
+                             "petmate")
   -c, --charset <name>       which ROM character set to use (choices:
                              "uppercase", "lowercase", default: "uppercase")
   -m, --method <method>      method for matching PETSCII characters (choices:
-                             "slow", "fast", default: "slow")
+                             "slow", "fast", default: "fast")
   -b, --background <method>  method for choosing background color (choices:
                              "optimal", "firstPixel", default: "optimal")
   --loadConfig <filename>    load config from a json file
@@ -50,10 +52,13 @@ Some simple cropping occurs to make the image 320x200 pixels in size.
 
 ### Output
 
-The output is a Petmate file with the input name with `.petmate` appended as
-an extension. In case a folder with multiple images was used as input, the
-images will result in multiple frames in the Petmate file, in alphabetical
-order.
+    -f, --format <name>
+
+- `petmate` creates a Petmate file. In case a folder with multiple images was
+  used as input, the images will result in multiple frames in one Petmate file,
+  in alphabetical order. This is the default.
+- `png` saves as PNG. In case a folder with multiple images was used as input,
+  one PNG file per input image is created.
 
 ### Options
 

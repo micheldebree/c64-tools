@@ -1,9 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises'
+import { ROMCharsetType } from './charset.js'
 
 export interface Config {
   matchType: MatchType
   backgroundDetectionType: BackgroundDetectionType
-  charSetType: CharsetType
+  charSetType: ROMCharsetType
   allowedChars: number[]
   overwrite: boolean
   mono: boolean
@@ -14,7 +15,7 @@ export interface Config {
 export interface CliOptions {
   background: BackgroundDetectionType
   method: MatchType
-  charset: CharsetType
+  charset: ROMCharsetType
   loadConfig: string
   saveConfig: string
   overwrite: boolean
@@ -33,11 +34,6 @@ export enum BackgroundDetectionType {
   firstPixel = 'firstPixel'
 }
 
-export enum CharsetType {
-  uppercase = 'uppercase',
-  lowercase = 'lowercase'
-}
-
 export enum FormatType {
   petmate = 'petmate',
   png = 'png'
@@ -50,7 +46,7 @@ const allChars: number[] = Array(255)
 export const defaultConfig: Config = {
   matchType: MatchType.slow,
   backgroundDetectionType: BackgroundDetectionType.optimal,
-  charSetType: CharsetType.uppercase,
+  charSetType: ROMCharsetType.uppercase,
   allowedChars: allChars,
   overwrite: false,
   mono: false,

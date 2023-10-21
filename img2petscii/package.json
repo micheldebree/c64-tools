@@ -4,7 +4,8 @@
   "main": "./built/cli.js",
   "bin": {
     "img2petscii": "./built/cli.js",
-    "rendercharset": "./built/charrenderer-cli.js"
+    "rendercharset": "./built/charrenderer-cli.js",
+    "petmate2image": "./built/petmate2img.js"
   },
   "author": "Michel de Bree <michel@micheldebree.nl>",
   "license": "MIT",

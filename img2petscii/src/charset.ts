@@ -4,8 +4,11 @@ import { relativePath } from './utils.js'
 
 export const bytesPerChar: number = 8
 export type CharSet = Char[]
-
 export type Char = Byte[] // 8 bytes
+export enum ROMCharsetType {
+  uppercase = 'uppercase',
+  lowercase = 'lowercase'
+}
 
 const romCharSetFile: string = './characters.901225-01.bin'
 
@@ -29,6 +32,6 @@ export async function readChars(filename: string, offset: number = 0): Promise<C
   return chars
 }
 
-export async function readRomCharSet(lowercase: boolean = false): Promise<CharSet> {
-  return await readChars(relativePath(romCharSetFile), lowercase ? 256 : 0)
+export async function readRomCharSet(charset: ROMCharsetType): Promise<CharSet> {
+  return await readChars(relativePath(romCharSetFile), charset === ROMCharsetType.lowercase ? 256 : 0)
 }
