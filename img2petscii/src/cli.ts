@@ -4,11 +4,22 @@ import { convertImage, getBackgroundColor, supportedExtensions } from './img2pet
 import { Command, Option } from 'commander'
 import { checkOverwrite, createOutputname, filenameWithouthExtension, toFilenames } from './utils.js'
 import { SharpImage } from './graphics.js'
-import { Petmate, toPetmate } from './petmate.js'
+import { Petmate, PetmateCharset, toPetmate } from './petmate.js'
 import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
-import { CharsetType, CliOptions, Config, fromCliOptions, loadConfig, saveConfig } from './config.js'
+import {
+  BackgroundDetectionType,
+  CharsetType,
+  CliOptions,
+  Config,
+  FormatType,
+  fromCliOptions,
+  loadConfig,
+  MatchType,
+  saveConfig
+} from './config.js'
 import { CharSet, readRomCharSet } from './charset.js'
+import { saveScreens } from './png.js'
 
 // TODO get version from package.json
 const version = '0.0.7'
@@ -43,30 +54,36 @@ async function loadCharset(config: Config): Promise<CharSet> {
 }
 
 async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
-  const petmateCharset: 'lower' | 'upper' = config.charSetType === CharsetType.lowercase ? 'lower' : 'upper'
+  const petmateCharset: PetmateCharset =
+    config.charSetType === CharsetType.lowercase ? PetmateCharset.lowercase : PetmateCharset.uppercase
   const petmate: Petmate = toPetmate(screens, petmateCharset)
   await writeFile(filename, JSON.stringify(petmate))
 }
 
 await (async function (): Promise<void> {
   const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
-    .choices(['optimal', 'firstPixel'])
-    .default('optimal')
+    .choices([BackgroundDetectionType.optimal, BackgroundDetectionType.firstPixel])
+    .default(BackgroundDetectionType.optimal)
 
   const optionMethod: Option = new Option('-m, --method <method>', 'method for matching PETSCII characters')
-    .choices(['slow', 'fast'])
-    .default('slow')
+    .choices([MatchType.slow, MatchType.fast])
+    .default(MatchType.fast)
 
   const optionCharset: Option = new Option('-c, --charset <name>', 'which ROM character set to use')
-    .choices(['uppercase', 'lowercase'])
-    .default('uppercase')
+    .choices([CharsetType.uppercase, CharsetType.lowercase])
+    .default(CharsetType.uppercase)
 
   const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
+
+  const optionFormat: Option = new Option('--format <name>', 'output format')
+    .choices([FormatType.petmate, FormatType.png])
+    .default(FormatType.petmate)
 
   const cli: Command = new Command()
     .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <file|folder>')
+    .addOption(optionFormat)
     .addOption(optionCharset)
     .addOption(optionMethod)
     .addOption(optionBackground)
@@ -87,7 +104,6 @@ await (async function (): Promise<void> {
     const options: CliOptions = cli.opts()
     let config: Config = fromCliOptions(options)
 
-    const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
     const backgroundColor: number = getBackgroundColor(firstImage)
@@ -102,13 +118,20 @@ await (async function (): Promise<void> {
     const charSet: CharSet = await loadCharset(config)
     const screens: Screen[] = await Promise.all(filenames.map((f: string) => convertFile(f, charSet, backgroundColor, config)))
 
-    await savePetmate(screens, outputName, config)
+    if (config.format == FormatType.petmate) {
+      const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
+      await savePetmate(screens, outputName, config)
+      console.log(`Output: ${outputName}`)
+    }
+
+    if (config.format == FormatType.png) {
+      const basename: string = filenameWithouthExtension(inputName)
+      await saveScreens(screens, charSet, basename, config.overwrite)
+    }
 
     if (options.saveConfig) {
       await saveConfig(config, options.saveConfig)
     }
-
-    console.log(`Output: ${outputName}`)
   } catch (err) {
     console.log(`\nERROR: ${err}.\n`)
     cli.help()

@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { FrameBuf, fromJSON, Petmate, toScreen } from './petmate.js'
+import { fromJSON, Petmate, toScreens } from './petmate.js'
 import { readFile } from 'node:fs/promises'
 import { saveScreens } from './png.js'
 import { CharSet, readRomCharSet } from './charset.js'
 import { Screen } from './model.js'
 import { filenameWithouthExtension } from './utils.js'
+
 await (async function (): Promise<void> {
   const cli: Command = new Command()
 
@@ -24,10 +25,10 @@ await (async function (): Promise<void> {
     const lowercase: boolean = petmate.framebufs[0].charset === 'lower'
     const charset: CharSet = await readRomCharSet(lowercase)
 
-    const screens: Screen[] = petmate.framebufs.map((frame: FrameBuf) => toScreen(frame))
+    const screens: Screen[] = toScreens(petmate)
 
     const outputBasename: string = filenameWithouthExtension(inputName)
-    await saveScreens(screens, charset, outputBasename)
+    await saveScreens(screens, charset, outputBasename, false)
   } catch (err) {
     console.log(`\nERROR: ${err}.\n`)
     cli.help()

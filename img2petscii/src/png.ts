@@ -4,7 +4,7 @@ import { Char, CharSet } from './charset.js'
 import { Screen, ScreenCell } from './model.js'
 import { checkOverwrite } from './utils.js'
 
-async function renderScreen(screen: Screen, charset: CharSet): Promise<Sharp> {
+async function toImage(screen: Screen, charset: CharSet): Promise<Sharp> {
   const bytesPerRow: number = 40
   const width: number = bytesPerRow * 8
   const height: number = 25 * 8
@@ -32,14 +32,14 @@ async function renderScreen(screen: Screen, charset: CharSet): Promise<Sharp> {
   return toSharp(img)
 }
 
-async function saveScreen(screen: Screen, charset: CharSet, basename: string): Promise<void> {
-  const renderedScreen: Sharp = await renderScreen(screen, charset)
+async function saveScreen(screen: Screen, charset: CharSet, basename: string, mayOverwrite: boolean): Promise<void> {
+  const renderedScreen: Sharp = await toImage(screen, charset)
   const outputName: string = `${basename}-${screen.id}.png`
-  await checkOverwrite(outputName, true)
+  await checkOverwrite(outputName, mayOverwrite)
   await renderedScreen.toFile(outputName)
   console.log(outputName)
 }
 
-export async function saveScreens(screens: Screen[], charset: CharSet, basename: string): Promise<void> {
-  await Promise.all(screens.map(async screen => await saveScreen(screen, charset, basename)))
+export async function saveScreens(screens: Screen[], charset: CharSet, basename: string, mayOverwrite: boolean): Promise<void> {
+  await Promise.all(screens.map(async (screen: Screen): Promise<void> => await saveScreen(screen, charset, basename, mayOverwrite)))
 }

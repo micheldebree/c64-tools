@@ -8,6 +8,7 @@ export interface Config {
   overwrite: boolean
   mono: boolean
   threshold: number
+  format: FormatType
 }
 
 export interface CliOptions {
@@ -19,6 +20,7 @@ export interface CliOptions {
   overwrite: boolean
   mono: boolean
   threshold: string
+  format: FormatType
 }
 
 export enum MatchType {
@@ -36,6 +38,11 @@ export enum CharsetType {
   lowercase = 'lowercase'
 }
 
+export enum FormatType {
+  petmate = 'petmate',
+  png = 'png'
+}
+
 const allChars: number[] = Array(255)
   .fill(0)
   .map((_c, i: number) => i)
@@ -47,7 +54,8 @@ export const defaultConfig: Config = {
   allowedChars: allChars,
   overwrite: false,
   mono: false,
-  threshold: 128
+  threshold: 128,
+  format: FormatType.petmate
 }
 
 export function fromCliOptions(options: CliOptions): Config {
@@ -58,6 +66,7 @@ export function fromCliOptions(options: CliOptions): Config {
   result.overwrite = options.overwrite
   result.mono = options.mono
   result.threshold = parseInt(options.threshold)
+  result.format = options.format
 
   if (result.threshold < 0 || result.threshold > 255) {
     throw new Error('Value for --threshold should be between 0 and 255')
