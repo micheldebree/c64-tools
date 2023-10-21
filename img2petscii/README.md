@@ -30,7 +30,7 @@ Options:
   -c, --charset <name>       which ROM character set to use (choices:
                              "uppercase", "lowercase", default: "uppercase")
   -m, --method <method>      method for matching PETSCII characters (choices:
-                             "slow", "fast", default: "fast")
+                             "slow", "fast", default: "slow")
   -b, --background <method>  method for choosing background color (choices:
                              "optimal", "firstPixel", default: "optimal")
   --loadConfig <filename>    load config from a json file

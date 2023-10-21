@@ -61,7 +61,7 @@ await (async function (): Promise<void> {
 
   const optionMethod: Option = new Option('-m, --method <method>', 'method for matching PETSCII characters')
     .choices([MatchType.slow, MatchType.fast])
-    .default(MatchType.fast)
+    .default(MatchType.slow)
 
   const optionCharset: Option = new Option('-c, --charset <name>', 'which ROM character set to use')
     .choices([ROMCharsetType.uppercase, ROMCharsetType.lowercase])
