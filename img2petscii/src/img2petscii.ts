@@ -1,7 +1,6 @@
 import {
   cellOffsets,
   char2Tile,
-  CharSet,
   distance,
   imageCoordinatesToByteOffset,
   parse8pixelRow,
@@ -10,8 +9,9 @@ import {
   Tile
 } from './graphics.js'
 import { quantize, quantize2index } from './quantizer.js'
-import { Screen, ScreenCell } from './petmate.js'
+import { Screen, ScreenCell } from './model.js'
 import { BackgroundDetectionType, Config, MatchType } from './config.js'
+import { CharSet } from './charset.js'
 
 interface WeightedScreenCell {
   cell: ScreenCell
@@ -23,7 +23,7 @@ export type MatchFunction = (tile: Tile, chars: CharSet, backgroundColor: number
 export const supportedExtensions: string[] = ['.png', '.jpg', '.webp']
 
 function mostOccurringColorIndex(pixels: number[]): number {
-  const counts: number[] = Array(16).fill(0)
+  const counts: number[] = Array<number>(16).fill(0)
   pixels.forEach((p: number) => counts[p]++)
   return counts
     .map((c: number, i: number) => [i, c])
@@ -95,7 +95,7 @@ function bestColorMatchForTile(tile: Tile, backgroundColor: number): number {
   return mostOccurringColorIndex(quantizeTile(tile).filter((c: number): boolean => c !== backgroundColor))
 }
 
-// cut SharpImage in 8x8 PixelColor tiles, this is a three dimensional array:
+// cut SharpImage in 8x8 PixelColor tiles, this is a three-dimensional array:
 // 8 rows of 8 pixels of [r, g, b]
 function cutIntoTiles(img: SharpImage): Tile[] {
   return cellOffsets(img).map((offset: number) =>
@@ -106,14 +106,8 @@ function cutIntoTiles(img: SharpImage): Tile[] {
   )
 }
 
-// convert an image  to a 40x25 array of screencodes
-export async function convertImage(
-  image: SharpImage,
-  charSet: CharSet,
-  firstPixelColor: number,
-  id: string,
-  config: Config
-): Promise<Screen> {
+// convert an image  to a 40x25 array of screen codes
+export function convertImage(image: SharpImage, charSet: CharSet, firstPixelColor: number, id: string, config: Config): Screen {
   const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor: number =
     config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
@@ -123,6 +117,6 @@ export async function convertImage(
 
 // get the overall background color from one file, by just getting the first
 // (quantized) pixel
-export async function getBackgroundColor(image: SharpImage): Promise<number> {
+export function getBackgroundColor(image: SharpImage): number {
   return quantize(image)[0]
 }

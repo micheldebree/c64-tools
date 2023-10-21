@@ -72,5 +72,5 @@ export async function saveConfig(config: Config, filename: string): Promise<void
 
 export async function loadConfig(filename: string): Promise<Config> {
   const buf: Buffer = await readFile(filename)
-  return JSON.parse(buf.toString())
+  return <Config>JSON.parse(buf.toString())
 }

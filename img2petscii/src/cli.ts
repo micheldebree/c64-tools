@@ -2,16 +2,18 @@
 import sharp, { Sharp } from 'sharp'
 import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { fileExists, filenameWithouthExtension, relativePath, toFilenames } from './utils.js'
-import { CharSet, readChars, SharpImage } from './graphics.js'
-import { Petmate, Screen, toPetmate } from './petmate.js'
+import { checkOverwrite, createOutputname, filenameWithouthExtension, toFilenames } from './utils.js'
+import { SharpImage } from './graphics.js'
+import { Petmate, toPetmate } from './petmate.js'
+import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
 import { CharsetType, CliOptions, Config, fromCliOptions, loadConfig, saveConfig } from './config.js'
+import { CharSet, readRomCharSet } from './charset.js'
 
 // TODO get version from package.json
 const version = '0.0.7'
-const cols = 40
-const rows = 25
+const cols: number = 40
+const rows: number = 25
 const width: number = cols * 8
 const height: number = rows * 8
 
@@ -36,15 +38,8 @@ async function convertFile(filename: string, charSet: CharSet, firstPixelColor: 
 }
 
 async function loadCharset(config: Config): Promise<CharSet> {
-  const offset: number = config.charSetType === CharsetType.lowercase ? 256 : 0
-  return await readChars(relativePath('./characters.901225-01.bin'), offset)
-}
-
-async function assertFileDoesNotExist(filename: string, config: Config): Promise<void> {
-  const exists: boolean = await fileExists(filename)
-  if (exists && !config.overwrite) {
-    throw new Error(`Output file ${filename} already exists. Use --overwrite to force overwriting.`)
-  }
+  const lowercase: boolean = config.charSetType === CharsetType.lowercase
+  return await readRomCharSet(lowercase)
 }
 
 async function savePetmate(screens: Screen[], filename: string, config: Config): Promise<void> {
@@ -53,9 +48,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
   await writeFile(filename, JSON.stringify(petmate))
 }
 
-;(async function (): Promise<void> {
-  const cli: Command = new Command()
-
+await (async function (): Promise<void> {
   const optionBackground: Option = new Option('-b, --background <method>', 'method for choosing background color')
     .choices(['optimal', 'firstPixel'])
     .default('optimal')
@@ -70,7 +63,7 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
 
   const optionThreshold: Option = new Option('--threshold <value>', 'threshold (0-255) for --mono mode').default(128)
 
-  cli
+  const cli: Command = new Command()
     .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <file|folder>')
@@ -88,25 +81,22 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
 
   if (inputName === undefined) {
     cli.help()
-    process.exit(1)
   }
 
   try {
-    const outputName: string = `${inputName}.petmate`
     const options: CliOptions = cli.opts()
     let config: Config = fromCliOptions(options)
 
+    const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
     const filenames: string[] = await toFilenames(inputName, supportedExtensions)
     const firstImage: SharpImage = await loadFile(filenames[0], config)
-    const backgroundColor: number = await getBackgroundColor(firstImage)
-
-    await assertFileDoesNotExist(outputName, config)
+    const backgroundColor: number = getBackgroundColor(firstImage)
 
     if (options.loadConfig) {
       config = await loadConfig(options.loadConfig)
     }
     if (options.saveConfig) {
-      await assertFileDoesNotExist(options.saveConfig, config)
+      await checkOverwrite(options.saveConfig, config.overwrite)
     }
 
     const charSet: CharSet = await loadCharset(config)
@@ -118,13 +108,9 @@ async function savePetmate(screens: Screen[], filename: string, config: Config):
       await saveConfig(config, options.saveConfig)
     }
 
-    // const charsetImg: Sharp = await renderCharSet(charSet)
-    // charsetImg.toFile('test.png')
-
     console.log(`Output: ${outputName}`)
   } catch (err) {
-    console.log(`\nERROR: ${err.message}.\n`)
+    console.log(`\nERROR: ${err}.\n`)
     cli.help()
-    process.exit(1)
   }
 })()

@@ -1,17 +1,7 @@
-const cols = 40
-const rows = 25
+import { Screen, ScreenCell } from './model.js'
 
-export interface ScreenCell {
-  code: number
-  color: number
-}
-
-// TODO: this is not petmate specific?
-export interface Screen {
-  id: string
-  backgroundColor: number
-  cells: ScreenCell[]
-}
+const cols: number = 40
+const rows: number = 25
 
 export interface FrameBuf {
   width: number
@@ -31,7 +21,7 @@ export interface Petmate {
 }
 
 export function fromJSON(json: string): Petmate {
-  const content: Petmate = JSON.parse(json)
+  const content: Petmate = <Petmate>JSON.parse(json)
 
   if (content.version !== 2) {
     throw new Error(`Unsupported Petmate version: ${content.version}`)
@@ -60,6 +50,14 @@ function toFramebuf(screen: Screen, charset: string = 'upper'): FrameBuf {
     framebuf,
     customFonts: {}
   }
+}
+
+export function toScreen(frame: FrameBuf): Screen {
+  const id: string = frame.name
+  const backgroundColor: number = frame.backgroundColor
+  const cells: ScreenCell[] = frame.framebuf.flat()
+
+  return { id, backgroundColor, cells }
 }
 
 export function toPetmate(screens: Screen[], charset: string = 'upper'): Petmate {
