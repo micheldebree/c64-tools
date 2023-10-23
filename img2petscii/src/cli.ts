@@ -17,7 +17,7 @@ import {
   MatchType,
   saveConfig
 } from './config.js'
-import { CharSet, ROMCharsetType, readRomCharSet } from './charset.js'
+import { CharSet, readRomCharSet, ROMCharsetType } from './charset.js'
 import { saveScreens } from './png.js'
 
 // TODO get version from package.json
@@ -107,6 +107,14 @@ await (async function (): Promise<void> {
     }
     if (options.saveConfig) {
       await checkOverwrite(options.saveConfig, config.overwrite)
+    }
+
+    // slow matchtype is nonsense in mono mode, so override with fast
+    if (options.mono) {
+      if (options.method === MatchType.slow) {
+        console.log('Warning: option --slow has no effect when also using --mono')
+      }
+      options.method = MatchType.fast
     }
 
     const charSet: CharSet = await readRomCharSet(config.charSetType)

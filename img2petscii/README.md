@@ -88,9 +88,10 @@ uses one background color for the whole animation.
     --mono
     --threshold
 
-Monochrome mode. First converts input to black and white. Use `--threshold` to
-change the quantization threshold. When `--threshold` is not supplied, a
-threshold of 128 is used.
+Monochrome mode. First converts input to black and white. Use `--threshold`
+to change the quantization threshold. When `--threshold` is not supplied, a
+threshold of 128 is used. Using `--method` together with `--mono` has no
+effect; the matching method is always `fast`.
 
     --saveConfig <filename>
     --loadConfig <filename>
