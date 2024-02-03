@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "module": "nodenext",
+    "rootDir": "./src",
     "outDir": "built",
     "noImplicitAny": false,
     "noImplicitThis": true,

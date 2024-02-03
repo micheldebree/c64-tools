@@ -106,7 +106,7 @@ function cutIntoTiles(img: SharpImage): Tile[] {
   )
 }
 
-// convert an image  to a 40x25 array of screen codes
+// convert an image to a 40x25 array of screen codes
 export function convertImage(image: SharpImage, charSet: CharSet, firstPixelColor: number, id: string, config: Config): Screen {
   const matcher: MatchFunction = config.matchType === MatchType.fast ? bestFastMatch : bestMatch
   const backgroundColor: number =

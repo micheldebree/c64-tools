@@ -5,7 +5,7 @@ BUILT=./built
 .PHONY: all
 all: node_modules
 	echo Building $(NAME)-$(VERSION)
-	./node_modules/.bin/tsc
+	yarn build
 	cp ./res/characters.901225-01.bin $(BUILT)
 
 .PHONY: publish

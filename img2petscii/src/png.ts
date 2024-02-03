@@ -37,7 +37,7 @@ async function saveScreen(screen: Screen, charset: CharSet, basename: string, ma
   const outputName: string = `${basename}-${screen.id}.png`
   await checkOverwrite(outputName, mayOverwrite)
   await renderedScreen.toFile(outputName)
-  console.log(outputName)
+  console.log(`Output: ${outputName}`)
 }
 
 export async function saveScreens(screens: Screen[], charset: CharSet, basename: string, mayOverwrite: boolean): Promise<void> {
