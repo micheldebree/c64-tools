@@ -9,5 +9,4 @@ if [ -z "${SID}" ]; then
   echo "USAGE: $0 <SID file> [length]"
   exit 0
 fi
-# ${JSIDPLAY} --single true -a WAV ${LENGTH_PARAM} "$1"
-${JSIDPLAY} -a WAV ${LENGTH_PARAM} "$1"
+${JSIDPLAY} -a WAV "$1"

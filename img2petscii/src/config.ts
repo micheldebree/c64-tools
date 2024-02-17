@@ -22,6 +22,7 @@ export interface CliOptions {
   mono: boolean
   threshold: string
   format: FormatType
+  output: string
 }
 
 export enum MatchType {

@@ -2,7 +2,7 @@ import { SharpImage, Tile, createImage, toSharp, char2Tile, PixelColor } from '.
 import { Sharp } from 'sharp'
 import { Char, CharSet } from './charset.js'
 import { Screen, ScreenCell } from './model.js'
-import { checkOverwrite } from './utils.js'
+import { validateOutputFilename } from './utils.js'
 
 async function toImage(screen: Screen, charset: CharSet): Promise<Sharp> {
   const bytesPerRow: number = 40
@@ -35,7 +35,7 @@ async function toImage(screen: Screen, charset: CharSet): Promise<Sharp> {
 async function saveScreen(screen: Screen, charset: CharSet, basename: string, mayOverwrite: boolean): Promise<void> {
   const renderedScreen: Sharp = await toImage(screen, charset)
   const outputName: string = `${basename}-${screen.id}.png`
-  await checkOverwrite(outputName, mayOverwrite)
+  await validateOutputFilename(outputName, mayOverwrite)
   await renderedScreen.toFile(outputName)
   console.log(`Output: ${outputName}`)
 }

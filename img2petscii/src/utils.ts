@@ -41,6 +41,16 @@ export async function fileExists(filename: string): Promise<boolean> {
   }
 }
 
+export async function folderExists(folder: string): Promise<boolean> {
+  let stats: Stats
+  try {
+    stats = await lstat(folder)
+  } catch {
+    return false
+  }
+  return stats.isDirectory()
+}
+
 // get a path relative to this module
 export function relativePath(filename: string): string {
   const __filename: string = fileURLToPath(import.meta.url)
@@ -52,7 +62,7 @@ export function filenameWithouthExtension(filename: string): string {
   return path.basename(filename, path.extname(filename))
 }
 
-function changeExtension(filename: string, extension: string): string {
+export function changeExtension(filename: string, extension: string): string {
   const currentExtension: string = path.extname(filename)
   if (currentExtension.toLowerCase() === extension.toLowerCase()) {
     throw new Error(`File already has extension ${extension}`)
@@ -60,7 +70,8 @@ function changeExtension(filename: string, extension: string): string {
   return `${path.basename(filename, currentExtension)}.${extension}`
 }
 
-export async function checkOverwrite(filename: string, mayOverwrite: boolean): Promise<void> {
+// throw an error if the file exists and overwrite is not allowed
+async function checkOverwrite(filename: string, mayOverwrite: boolean): Promise<void> {
   if (!mayOverwrite) {
     const exists: boolean = await fileExists(filename)
     if (exists) {
@@ -69,8 +80,13 @@ export async function checkOverwrite(filename: string, mayOverwrite: boolean): P
   }
 }
 
-export async function createOutputname(inputFilename: string, outputExtension: string, mayOverwrite: boolean): Promise<string> {
-  const result: string = changeExtension(inputFilename, outputExtension)
-  await checkOverwrite(result, mayOverwrite)
-  return result
+// throw an error if the file is a folder or if it exists already and is not allowed to be overwritten
+export async function validateOutputFilename(filename: string, mayOverwrite: boolean): Promise<void> {
+  const isFolder: boolean = await folderExists(filename)
+
+  if (isFolder) {
+    throw new Error(`Output file ${filename} is an existing directory and cannot be used`)
+  }
+
+  await checkOverwrite(filename, mayOverwrite)
 }

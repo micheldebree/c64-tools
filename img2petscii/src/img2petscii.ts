@@ -112,6 +112,7 @@ export function convertImage(image: SharpImage, charSet: CharSet, firstPixelColo
   const backgroundColor: number =
     config.backgroundDetectionType === BackgroundDetectionType.firstPixel ? firstPixelColor : bestBackgroundColor(image)
   const cells: ScreenCell[] = cutIntoTiles(image).map((t: Tile) => matcher(t, charSet, backgroundColor, config))
+  console.log(`Processed ${id}`)
   return { id, backgroundColor, cells }
 }
 

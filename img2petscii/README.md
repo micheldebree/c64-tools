@@ -18,27 +18,28 @@ You now have a command called `img2petscii`
 
 ## Usage
 
-```
+```bash
 Usage: img2petscii [options] <file|folder>
 
 Convert images to PETSCII
 
 Options:
-  -V, --version              output the version number
-  -f, --format <name>        output format (choices: "petmate", "png", default:
-                             "petmate")
-  -c, --charset <name>       which ROM character set to use (choices:
-                             "uppercase", "lowercase", default: "uppercase")
-  -m, --method <method>      method for matching PETSCII characters (choices:
-                             "slow", "fast", default: "slow")
-  -b, --background <method>  method for choosing background color (choices:
-                             "optimal", "firstPixel", default: "optimal")
-  --loadConfig <filename>    load config from a json file
-  --saveConfig <filename>    saves config to a json file
-  --overwrite                force overwrite of existing files
-  --mono                     single color mode
-  --threshold <value>        threshold (0-255) for --mono mode (default: 128)
-  -h, --help                 display help for command
+  -V, --version               output the version number
+  -o, --output <output name>  set filename or folder for output
+  -f, --format <name>         output format (choices: "petmate", "png",
+                              default: "petmate")
+  -c, --charset <name>        which ROM character set to use (choices:
+                              "uppercase", "lowercase", default: "uppercase")
+  -m, --method <method>       method for matching PETSCII characters (choices:
+                              "slow", "fast", default: "slow")
+  -b, --background <method>   method for choosing background color (choices:
+                              "optimal", "firstPixel", default: "optimal")
+  --loadConfig <filename>     load config from a json file
+  --saveConfig <filename>     saves config to a json file
+  --overwrite                 force overwrite of existing files
+  --mono                      single color mode
+  --threshold <value>         threshold (0-255) for --mono mode (default: 128)
+  -h, --help                  display help for command
 ```
 
 ### Input
@@ -52,7 +53,9 @@ Some simple cropping occurs to make the image 320x200 pixels in size.
 
 ### Output
 
-    -f, --format <name>
+```bash
+-f, --format <name>
+```
 
 - `petmate` creates a Petmate file. In case a folder with multiple images was
   used as input, the images will result in multiple frames in one Petmate file,
@@ -60,9 +63,22 @@ Some simple cropping occurs to make the image 320x200 pixels in size.
 - `png` saves as PNG. In case a folder with multiple images was used as input,
   one PNG file per input image is created.
 
+```bash
+-o, --output <output name>
+```
+
+Optional output filename. If not supplied, `img2petscii` will make one up for
+you.
+
+- for `petmate`, this should be a file.
+- for `png`, this can be a filename or an (existing) folder name. The folder
+  name can be useful because every frame is exported as a separate `png` file.
+
 ### Options
 
-    -m, --method <method>
+```bash
+-m, --method <method>
+```
 
 Both methods render all the supported characters with a background and
 foreground color, and find the best match by minimizing the Euclidian (RGB)
@@ -74,7 +90,9 @@ The `fast` method renders all the characters in one color, which it will determi
 by first quantizing the tile to the c64 palette, and then selecting the most
 occuring color.
 
-    -b, --background <method>
+```bash
+-b, --background <method>
+```
 
 The `optimal` method quantizes each image to the c64 palette and selects the most
 occuring color as the background color for that frame.
@@ -85,16 +103,20 @@ animation, where the `optimal` setting might decide on different background
 colors for different frames in the animation. The `firstPixel` option always
 uses one background color for the whole animation.
 
-    --mono
-    --threshold
+```bash
+--mono
+--threshold
+```
 
 Monochrome mode. First converts input to black and white. Use `--threshold`
 to change the quantization threshold. When `--threshold` is not supplied, a
 threshold of 128 is used. Using `--method` together with `--mono` has no
 effect; the matching method is always `fast`.
 
-    --saveConfig <filename>
-    --loadConfig <filename>
+```bash
+--saveConfig <filename>
+--loadConfig <filename>
+```
 
 Save configuraton to a JSON file, or load a saved configuration. The
 configuration file holds the values supplied on the command line, and default

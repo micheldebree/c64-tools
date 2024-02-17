@@ -1,27 +1,28 @@
 #!/usr/bin/env node
-import sharp, { Sharp } from 'sharp'
-import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
 import { Command, Option } from 'commander'
-import { checkOverwrite, createOutputname, filenameWithouthExtension, toFilenames } from './utils.js'
-import { SharpImage } from './graphics.js'
-import { Petmate, PetmateCharset, toPetmate } from './petmate.js'
-import { Screen } from './model.js'
 import { writeFile } from 'node:fs/promises'
+import path from 'path'
+import sharp, { Sharp } from 'sharp'
+import { CharSet, ROMCharsetType, readRomCharSet } from './charset.js'
 import {
   BackgroundDetectionType,
   CliOptions,
   Config,
   FormatType,
+  MatchType,
   fromCliOptions,
   loadConfig,
-  MatchType,
   saveConfig
 } from './config.js'
-import { CharSet, readRomCharSet, ROMCharsetType } from './charset.js'
+import { SharpImage } from './graphics.js'
+import { convertImage, getBackgroundColor, supportedExtensions } from './img2petscii.js'
+import { Screen } from './model.js'
+import { Petmate, PetmateCharset, toPetmate } from './petmate.js'
 import { saveScreens } from './png.js'
+import { changeExtension, filenameWithouthExtension, folderExists, toFilenames, validateOutputFilename } from './utils.js'
 
 // TODO get version from package.json
-const version = '0.0.7'
+const version = '0.0.8'
 const cols: number = 40
 const rows: number = 25
 const width: number = cols * 8
@@ -77,6 +78,7 @@ await (async function (): Promise<void> {
     .version(version)
     .description('Convert images to PETSCII')
     .usage('[options] <file|folder>')
+    .option('-o, --output <output name>', 'set filename or folder for output')
     .addOption(optionFormat)
     .addOption(optionCharset)
     .addOption(optionMethod)
@@ -106,7 +108,7 @@ await (async function (): Promise<void> {
       config = await loadConfig(options.loadConfig)
     }
     if (options.saveConfig) {
-      await checkOverwrite(options.saveConfig, config.overwrite)
+      await validateOutputFilename(options.saveConfig, config.overwrite)
     }
 
     // slow matchtype is nonsense in mono mode, so override with fast
@@ -120,22 +122,36 @@ await (async function (): Promise<void> {
     const charSet: CharSet = await readRomCharSet(config.charSetType)
     const screens: Screen[] = await Promise.all(filenames.map((f: string) => convertFile(f, charSet, backgroundColor, config)))
 
+    // petmate output
     if (config.format == FormatType.petmate) {
-      const outputName: string = await createOutputname(inputName, 'petmate', config.overwrite)
+      const outputName: string = options.output ?? changeExtension(inputName, 'petmate')
+      await validateOutputFilename(outputName, config.overwrite)
       await savePetmate(screens, outputName, config)
       console.log(`Output: ${outputName}`)
     }
 
+    // png output
     if (config.format == FormatType.png) {
       const basename: string = filenameWithouthExtension(inputName)
-      await saveScreens(screens, charSet, basename, config.overwrite)
+      let outputName: string = options.output
+
+      if (!outputName) {
+        outputName = basename
+        await validateOutputFilename(outputName, config.overwrite)
+      } else {
+        if (await folderExists(outputName)) {
+          outputName = path.join(outputName, 'out')
+        }
+      }
+
+      await saveScreens(screens, charSet, outputName, config.overwrite)
     }
 
     if (options.saveConfig) {
       await saveConfig(config, options.saveConfig)
     }
   } catch (err) {
-    console.log(`\nERROR: ${err}.\n`)
+    console.log(`\n${err}.\n`)
     cli.help()
   }
 })()

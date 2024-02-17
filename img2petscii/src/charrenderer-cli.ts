@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander'
-import { createOutputname } from './utils.js'
+import { changeExtension, validateOutputFilename } from './utils.js'
 import { CharSet, readChars } from './charset.js'
 import { renderCharSet } from './charrenderer.js'
 import { Sharp } from 'sharp'
@@ -19,7 +19,8 @@ await (async function (): Promise<void> {
     cli.help()
   }
 
-  const outputName: string = await createOutputname(inputName, 'png', false)
+  const outputName: string = changeExtension(inputName, 'png')
+  await validateOutputFilename(outputName, false)
   const charset: CharSet = await readChars(inputName)
   const image: Sharp = await renderCharSet(charset)
 
