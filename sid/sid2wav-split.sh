@@ -12,8 +12,8 @@ if [ -z "${SID}" ]; then
 fi
 
 ${JSIDPLAY} --muteVoice2 true --muteVoice3 true --audio WAV --single true "${SID}"
-mv "${BASENAME}.wav" "${BASENAME}-track_1.wav"
+mv "${BASENAME}-01.wav" "${BASENAME}-track_1.wav"
 ${JSIDPLAY} --muteVoice1 true --muteVoice3 true --audio WAV --single true "${SID}"
-mv "${BASENAME}.wav" "${BASENAME}-track_2.wav"
+mv "${BASENAME}-01.wav" "${BASENAME}-track_2.wav"
 ${JSIDPLAY} --muteVoice1 true --muteVoice2 true --audio WAV --single true "${SID}"
-mv "${BASENAME}.wav" "${BASENAME}-track_3.wav"
+mv "${BASENAME}-01.wav" "${BASENAME}-track_3.wav"
