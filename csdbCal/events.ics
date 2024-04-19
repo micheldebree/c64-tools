@@ -1,0 +1,123 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//arran4//Golang ICS Library
+BEGIN:VEVENT
+UID:event3391
+SUMMARY:C64GFX.com CharSet Logo Compo 2024
+DESCRIPTION:Standalone Compo
+URL:https://c64gfx.com/compo/charsetlogocompo2024
+LOCATION:
+DTSTART;VALUE=DATE:20240207
+DTEND;VALUE=DATE:20240430
+END:VEVENT
+BEGIN:VEVENT
+UID:event3403
+SUMMARY:HCC Meeting April 2024
+DESCRIPTION:8 bit Party
+URL:https://commodore.hcc.nl/rss-events/evenement/19-clubdag-met-atari-take
+ over-en-presentatie
+LOCATION:Zwanenkamp 1301\, Maarssen\, Netherlands
+DTSTART;VALUE=DATE:20240420
+DTEND;VALUE=DATE:20240420
+END:VEVENT
+BEGIN:VEVENT
+UID:event3294
+SUMMARY:X'2024
+DESCRIPTION:C64 Only Party
+URL:https://xparty.net/
+LOCATION:De Hoof 18\, Someren\, Netherlands
+DTSTART;VALUE=DATE:20240510
+DTEND;VALUE=DATE:20240512
+END:VEVENT
+BEGIN:VEVENT
+UID:event3298
+SUMMARY:Moonshine Dragons 2024
+DESCRIPTION:Demo Party
+URL:https://moonshinedragons.party
+LOCATION:GeneraÅ‚a Kazimierza Sosnkowskiego 29A\, Opole\, Poland
+DTSTART;VALUE=DATE:20240524
+DTEND;VALUE=DATE:20240526
+END:VEVENT
+BEGIN:VEVENT
+UID:event3387
+SUMMARY:Reunion 2024
+DESCRIPTION:Demo Party
+URL:http://www.reunion.nu
+LOCATION:Folkets hus\, Kvidinge\, Sweden
+DTSTART;VALUE=DATE:20240628
+DTEND;VALUE=DATE:20240630
+END:VEVENT
+BEGIN:VEVENT
+UID:event3388
+SUMMARY:Arok Party 2024
+DESCRIPTION:8 bit Party
+URL:https://arok.intro.hu/2024/
+LOCATION:Ajka\, Hungary
+DTSTART;VALUE=DATE:20240628
+DTEND;VALUE=DATE:20240630
+END:VEVENT
+BEGIN:VEVENT
+UID:event3393
+SUMMARY:C64 Symposium: Past\, Present\, and Future of a Home Computer
+DESCRIPTION:Meeting
+URL:https://www.medienwissenschaft.uni-bonn.de/tagungen/commodore-64-past-p
+ resent-and-future-of-a-home-computer
+LOCATION:Bonn University\, LennÃ©straÃŸe 1\, Bonn\, Germany
+DTSTART;VALUE=DATE:20240705
+DTEND;VALUE=DATE:20240707
+END:VEVENT
+BEGIN:VEVENT
+UID:event3389
+SUMMARY:PÃ¥gadata 2024
+DESCRIPTION:Demo Party
+URL:https://pÃ¥gadata.se/
+LOCATION:Folkets hus\, Ã–rtofta\, Sweden
+DTSTART;VALUE=DATE:20240809
+DTEND;VALUE=DATE:20240811
+END:VEVENT
+BEGIN:VEVENT
+UID:event3400
+SUMMARY:Xenium 2024
+DESCRIPTION:Demo Party
+URL:http://xenium.rocks
+LOCATION:Å�Ã³dÅº\, Poland
+DTSTART;VALUE=DATE:20240829
+DTEND;VALUE=DATE:20240901
+END:VEVENT
+BEGIN:VEVENT
+UID:event3381
+SUMMARY:ACQUA Party 2024
+DESCRIPTION:C64 Only Party
+URL:https://acqua.abyss-connection.de/
+LOCATION:Vreden\, Germany
+DTSTART;VALUE=DATE:20240830
+DTEND;VALUE=DATE:20240901
+END:VEVENT
+BEGIN:VEVENT
+UID:event3297
+SUMMARY:Zoo 2024
+DESCRIPTION:Demo Party
+URL:https://2024.zooparty.org/
+LOCATION:Orivesi Campus\, Koulutie 5\, Orivesi\, Finland
+DTSTART;VALUE=DATE:20241101
+DTEND;VALUE=DATE:20241103
+END:VEVENT
+BEGIN:VEVENT
+UID:event3385
+SUMMARY:Transmission64 2024
+DESCRIPTION:Demo Party
+URL:https://transmission64.com/
+LOCATION:
+DTSTART;VALUE=DATE:20241123
+DTEND;VALUE=DATE:20241123
+END:VEVENT
+BEGIN:VEVENT
+UID:event3404
+SUMMARY:Forever 2025 - Jurassic party
+DESCRIPTION:8 bit Party
+URL:http://forever.zeroteam.sk
+LOCATION:SuchÃ¡ nad Parnou / Trnava / Slovakia\, Trnava\, Slovakia
+DTSTART;VALUE=DATE:20250321
+DTEND;VALUE=DATE:20250323
+END:VEVENT
+END:VCALENDAR
