@@ -62,9 +62,9 @@ func cluster(pixels *[]Pixel, nrClusters int) clusters.Clusters {
 	return result
 }
 
-func reducePaletteKmeans(img IndexedImage, maxColors int) Palette {
+func reducePaletteKmeans(img IndexedImage, layer Layer) Palette {
 
-	colorClusters := cluster(&img.pixels, maxColors)
+	colorClusters := cluster(&img.pixels, len(layer.bitpatterns))
 	quantizedMeans := quantizeClusters(colorClusters, img.spec.palette)
 
 	result := make(Palette)

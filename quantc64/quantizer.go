@@ -73,17 +73,16 @@ func QuantizeToIndex(aColor colorful.Color, palette Palette) (int, float64) {
 	return BestPixelIndex(Distances(aColor, palette))
 }
 
-func quantizeCells(cells []IndexedImage, spec Retrospec, layer Layer) []IndexedImage {
+func quantizeCells(cells []IndexedImage, layer Layer) []IndexedImage {
 	result := make([]IndexedImage, len(cells))
 	for ci, cell := range cells {
-		result[ci] = quantize(cell, spec, layer)
+		result[ci] = quantize(cell, layer)
 	}
 	return result
 }
 
-// TODO: spec is already in img
-func quantize(img IndexedImage, spec Retrospec, layer Layer) IndexedImage {
-	// newPalette := reducePaletteKmeans(img, maxColors)
+func quantize(img IndexedImage, layer Layer) IndexedImage {
+	// newPalette := reducePaletteKmeans(img, layer)
 	// TODO: assign bitpatterns in reducePalette
 	newPalette := reducePalette(img, layer)
 
@@ -102,11 +101,11 @@ func quantize(img IndexedImage, spec Retrospec, layer Layer) IndexedImage {
 			newPixel = QuantizePixel(pixel, newPalette)
 			newPixel.bitPattern = 0x11
 		} else { // not the last layer, only process pixels with a bitpattern in the new palette
-			newPixel = QuantizePixel(pixel, spec.palette)
+			newPixel = QuantizePixel(pixel, img.spec.palette)
 			_, present := newPalette[newPixel.paletteIndex]
 			if present {
 				newPixel.bitPattern = 0x11
-			} 
+			}
 		}
 		newPixels[pi] = newPixel
 		count++
@@ -114,7 +113,7 @@ func quantize(img IndexedImage, spec Retrospec, layer Layer) IndexedImage {
 	// fmt.Printf("%d pixels have been assigned a bit pattern\n", count)
 
 	// newSpec := Retrospec{spec.width, spec.height, spec.pixelWidth, newPalette}
-	return IndexedImage{spec, newPixels}
+	return IndexedImage{img.spec, newPixels}
 }
 
 // assign a bit pattern to each entry in the palette
