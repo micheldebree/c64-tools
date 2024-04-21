@@ -34,13 +34,16 @@ func main() {
 	indexedImage := toIndexedImage(&img, spec)
 	OrderedDither(&indexedImage, bayer4x4, 0.1)
 
-	bgColor := findBestBackgroundColor(indexedImage)
-	fmt.Printf("Background color is %d", bgColor)
+	backgroundLayer := Layer{320, 200, []int8{0}, false}
 
-	filteredImage := indexedImage.assignBitPattern(bgColor, 0x00)
+	// Determine background
+	quantizedImage := quantize(indexedImage, spec, backgroundLayer)
+	bgColor := quantizedImage.pixels[0].paletteIndex
+	fmt.Printf("Background color is %d\n", bgColor)
 
-	cells := getCells(filteredImage)
-	quantizedCells := quantizeCells(cells, spec, 3)
+	mcLayer := Layer{4, 8, []int8{0x01, 0x10, 0x11}, true}
+	cells := getCells(quantizedImage)
+	quantizedCells := quantizeCells(cells, spec, mcLayer)
 	newImage := combine(&quantizedCells, spec)
 
 	result := newImage.Render()
@@ -48,16 +51,4 @@ func main() {
 
 	fmt.Printf("%v, %v\n", indexedImage.spec.width, indexedImage.spec.height)
 
-}
-
-func findBestBackgroundColor(img IndexedImage) int {
-	backgroundPalette := reducePalette(img, 1)
-	if len(backgroundPalette) != 1 {
-		panic("Cannot determine background color")
-	}
-
-	for k := range backgroundPalette {
-		return k
-	}
-	panic("Cannot determine background color")
 }

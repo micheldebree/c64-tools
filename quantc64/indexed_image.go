@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"image"
 )
 
@@ -10,6 +9,8 @@ type IndexedImage struct {
 	spec   Retrospec
 	pixels []Pixel
 }
+
+type bitPatternToPaletteIndex map[int]int
 
 type Retrospec struct {
 	width      int
@@ -45,29 +46,6 @@ func (img *IndexedImage) PixelAt(x, y int) Pixel {
 
 func (img *IndexedImage) SetPixel(pixel Pixel) {
 	img.pixels[pixel.y*img.spec.width+pixel.x] = pixel
-}
-
-// Assign a bit pattern to all the pixels which are quantized to a certain palette index
-func (img *IndexedImage) assignBitPattern(index int, bitPattern int8) IndexedImage {
-
-	result := newIndexedImage(img.spec)
-
-	for _, pixel := range img.pixels {
-
-		if pixel.hasBitPattern() {
-			panic(fmt.Sprintf("Pixel %v already has bit pattern assigned", pixel))
-		}
-
-		newPixel := QuantizePixel(pixel, img.spec.palette)
-
-		if newPixel.paletteIndex == index {
-			newPixel.bitPattern = bitPattern
-		}
-
-		result.SetPixel(newPixel)
-
-	}
-	return result
 }
 
 func combine(cells *[]IndexedImage, spec Retrospec) IndexedImage {

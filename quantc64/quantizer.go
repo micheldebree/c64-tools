@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 	"sort"
 
@@ -11,6 +12,18 @@ import (
 // PaletteDistance The distance from an RGB pixel to each key in a Palette
 // In the order of the palette
 type PaletteDistance map[int]float64
+
+// Maps a palette index to an attribute (bitpattern)
+type BitPatterns struct {
+	indexToPattern map[int]int
+	palette        Palette
+}
+
+type Layer struct {
+	cellWidth, cellHeight int
+	bitpatterns           []int8
+	isLast                bool // the last layer should quantize all remaining pixels
+}
 
 func distance(color1, color2 colorful.Color) float64 {
 	return color1.DistanceRgb(color2)
@@ -60,41 +73,80 @@ func QuantizeToIndex(aColor colorful.Color, palette Palette) (int, float64) {
 	return BestPixelIndex(Distances(aColor, palette))
 }
 
-func quantizeCells(cells []IndexedImage, spec Retrospec, maxColors int) []IndexedImage {
+func quantizeCells(cells []IndexedImage, spec Retrospec, layer Layer) []IndexedImage {
 	result := make([]IndexedImage, len(cells))
 	for ci, cell := range cells {
-		result[ci] = quantize(cell, spec, maxColors)
+		result[ci] = quantize(cell, spec, layer)
 	}
 	return result
 }
 
-func quantize(img IndexedImage, spec Retrospec, maxColors int) IndexedImage {
-	// pal := reducePaletteKmeans(img, maxColors)
-	pal := reducePalette(img, maxColors)
+// TODO: spec is already in img
+func quantize(img IndexedImage, spec Retrospec, layer Layer) IndexedImage {
+	// newPalette := reducePaletteKmeans(img, maxColors)
+	// TODO: assign bitpatterns in reducePalette
+	newPalette := reducePalette(img, layer)
+
 	newPixels := make([]Pixel, len(img.pixels))
+
+	// paletteIndexToBitPattern := assignBitPatterns(layer, newPalette)
+
+	var count int
 	for pi, pixel := range img.pixels {
-		// pixels that are already assigned a bitpattern don't count
-		if pixel.hasBitPattern() {
-			newPixels[pi] = pixel
-		} else {
-			newPixels[pi] = QuantizePixel(pixel, pal)
+		var newPixel Pixel
+		// pixels that are already assigned a bitpattern should not
+		// be quantized as their color will not be in the reduced palette
+		if pixel.hasBitPattern() { // has already been processed
+			newPixel = pixel
+		} else if layer.isLast { // last layer, all pixels should be quantized against new palette
+			newPixel = QuantizePixel(pixel, newPalette)
+			newPixel.bitPattern = 0x11
+		} else { // not the last layer, only process pixels with a bitpattern in the new palette
+			newPixel = QuantizePixel(pixel, spec.palette)
+			_, present := newPalette[newPixel.paletteIndex]
+			if present {
+				newPixel.bitPattern = 0x11
+			} 
 		}
+		newPixels[pi] = newPixel
+		count++
 	}
+	// fmt.Printf("%d pixels have been assigned a bit pattern\n", count)
+
+	// newSpec := Retrospec{spec.width, spec.height, spec.pixelWidth, newPalette}
 	return IndexedImage{spec, newPixels}
+}
+
+// assign a bit pattern to each entry in the palette
+// map paletteindex -> bit pattern
+func assignBitPatterns(layer Layer, palette Palette) map[int]int8 {
+
+	if len(layer.bitpatterns) < len(palette) {
+		panic(fmt.Sprintf("Not enough bit patterns (%d) for palette of length (%d)", len(layer.bitpatterns), len(palette)))
+	}
+
+	result := make(map[int]int8)
+
+	i := 0
+	for k := range palette {
+		result[k] = layer.bitpatterns[i]
+		i++
+	}
+	return result
 }
 
 // reduce a palette to maximum number of colors according to their
 // quantized occurence in pixels
-func reducePalette(img IndexedImage, maxColors int) Palette {
+func reducePalette(img IndexedImage, layer Layer) Palette {
 
 	indexToCount := make(map[int]int)
 
 	// count nr of pixels for each quantized color
 	for _, pixel := range img.pixels {
-		pixel = QuantizePixel(pixel, img.spec.palette)
 
 		// pixels that are already assigned a bitpattern don't count
 		if !pixel.hasBitPattern() {
+			pixel = QuantizePixel(pixel, img.spec.palette)
 			indexToCount[pixel.paletteIndex] += 1
 		}
 	}
@@ -105,11 +157,13 @@ func reducePalette(img IndexedImage, maxColors int) Palette {
 		return indexToCount[keys[i]] > indexToCount[keys[j]]
 	})
 
+	maxColors := len(layer.bitpatterns)
 	if maxColors < len(keys) {
 		keys = keys[0:maxColors]
 	}
 
 	result := make(Palette)
+
 	for _, key := range keys {
 		result[key] = img.spec.palette[key]
 	}
