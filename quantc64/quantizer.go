@@ -85,7 +85,6 @@ func quantizeCells(cells []IndexedImage, layer Layer) []IndexedImage {
 
 func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 	// newPalette := reducePaletteKmeans(img, layer)
-	// TODO: color with assigned bitpair can also join the palette?
 	newPalette := reducePalette(img, layer)
 
 	newPixels := make([]Pixel, len(img.pixels))
@@ -102,17 +101,14 @@ func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 			newPixel.bitPattern = newPalette.bitpatterns[newPixel.paletteIndex]
 		} else { // not the last layer, only process pixels with a bitpattern in the new palette
 			newPixel = QuantizePixel(pixel, img.spec.palette)
-			_, present := newPalette.palette[newPixel.paletteIndex]
+			bitpattern, present := newPalette.bitpatterns[newPixel.paletteIndex]
 			if present {
-				newPixel.bitPattern = newPalette.bitpatterns[newPixel.paletteIndex]
+				newPixel.bitPattern = bitpattern
 			}
 		}
 		newPixels[pi] = newPixel
 		count++
 	}
-	// fmt.Printf("%d pixels have been assigned a bit pattern\n", count)
-
-	// newSpec := Retrospec{spec.width, spec.height, spec.pixelWidth, newPalette}
 	return IndexedImage{img.spec, newPixels}
 }
 
@@ -122,6 +118,10 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 
 	indexToCount := make(map[int]int)
 
+	// TODO: make bitpattern map a type
+	// TODO: does this make any difference?
+	existingBitpatterns := make(map[int]int8)
+
 	// count nr of pixels for each quantized color
 	for _, pixel := range img.pixels {
 
@@ -130,6 +130,8 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 		if !pixel.hasBitPattern() {
 			pixel = QuantizePixel(pixel, img.spec.palette)
 			indexToCount[pixel.paletteIndex] += 1
+		} else {
+			existingBitpatterns[pixel.paletteIndex] = pixel.bitPattern
 		}
 	}
 
@@ -155,6 +157,16 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 	for _, key := range keys {
 		newPalette[key] = img.spec.palette[key]
 		newBitpatterns[key] = layer.bitpatterns[i]
+		i++
 	}
+
+	// Add existing bitpatterns to the palette so they also get a chance
+	// TODO: does this make any difference?
+	for key := range existingBitpatterns {
+		newPalette[key] = img.spec.palette[key]
+		newBitpatterns[key] = existingBitpatterns[key]
+		// fmt.Printf("Bit pattern %d with color %d added to palette", newBitpatterns[key], key )
+	}
+
 	return ReducedPalette{newPalette, newBitpatterns}
 }

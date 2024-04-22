@@ -62,14 +62,18 @@ func cluster(pixels *[]Pixel, nrClusters int) clusters.Clusters {
 	return result
 }
 
-func reducePaletteKmeans(img IndexedImage, layer Layer) Palette {
+func reducePaletteKmeans(img IndexedImage, layer Layer) ReducedPalette {
 
 	colorClusters := cluster(&img.pixels, len(layer.bitpatterns))
 	quantizedMeans := quantizeClusters(colorClusters, img.spec.palette)
 
-	result := make(Palette)
+	newPalette := make(Palette)
+	newBitpatterns := make(map[int]int8)
+	i := 0
 	for _, quantizedMean := range quantizedMeans {
-		result[quantizedMean] = img.spec.palette[quantizedMean]
+		newPalette[quantizedMean] = img.spec.palette[quantizedMean]
+		newBitpatterns[quantizedMean] = layer.bitpatterns[i]
+		i++
 	}
-	return result
+	return ReducedPalette{newPalette, newBitpatterns}
 }
