@@ -91,21 +91,19 @@ func getPixels(image *image.Image) []Pixel {
 }
 
 // Cut up image into cells
-func getCells(img IndexedImage) []IndexedImage {
-	cellWidth := 8 / img.spec.pixelWidth
-	cellHeight := 8
+func getCells(img IndexedImage, layer Layer) []IndexedImage {
 
 	w, h := img.spec.width, img.spec.height
 
-	nrCols, nrRows := w/cellWidth, h/cellHeight
+	nrCols, nrRows := w/layer.cellWidth, h/layer.cellHeight
 
 	result := make([]IndexedImage, nrCols*nrRows)
 	for cy := range nrRows {
 		for cx := range nrCols {
-			cell := make([]Pixel, cellWidth*cellHeight)
-			for py := range cellHeight {
-				for px := range cellWidth {
-					cell[py*cellWidth+px] = img.PixelAt(cx*cellWidth+px, cy*cellHeight+py)
+			cell := make([]Pixel, layer.cellWidth*layer.cellHeight)
+			for py := range layer.cellHeight {
+				for px := range layer.cellWidth {
+					cell[py*layer.cellWidth+px] = img.PixelAt(cx*layer.cellWidth+px, cy*layer.cellHeight+py)
 				}
 			}
 			result[cy*nrCols+cx] = IndexedImage{img.spec, cell}

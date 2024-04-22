@@ -13,18 +13,6 @@ import (
 // In the order of the palette
 type PaletteDistance map[int]float64
 
-// Maps a palette index to an attribute (bitpattern)
-type BitPatterns struct {
-	indexToPattern map[int]int
-	palette        Palette
-}
-
-type Layer struct {
-	cellWidth, cellHeight int
-	bitpatterns           []int8
-	isLast                bool // the last layer should quantize all remaining pixels
-}
-
 func distance(color1, color2 colorful.Color) float64 {
 	return color1.DistanceRgb(color2)
 	// return color1.DistanceCIE94(color2)
@@ -73,17 +61,28 @@ func QuantizeToIndex(aColor colorful.Color, palette Palette) (int, float64) {
 	return BestPixelIndex(Distances(aColor, palette))
 }
 
-func quantizeCells(cells []IndexedImage, layer Layer) []IndexedImage {
-	result := make([]IndexedImage, len(cells))
-	for ci, cell := range cells {
-		result[ci] = quantize(cell, layer)
+func Quantize(img IndexedImage) IndexedImage {
+	result := img
+	for _, layer := range img.spec.layers {
+		cells := getCells(result, layer)
+		qCells := quantizeCells(cells, layer)
+		result = combine(&qCells, img.spec)
 	}
 	return result
 }
 
-func quantize(img IndexedImage, layer Layer) IndexedImage {
+func quantizeCells(cells []IndexedImage, layer Layer) []IndexedImage {
+	result := make([]IndexedImage, len(cells))
+	for ci, cell := range cells {
+		result[ci] = quantizeCell(cell, layer)
+	}
+	return result
+}
+
+func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 	// newPalette := reducePaletteKmeans(img, layer)
 	// TODO: assign bitpatterns in reducePalette
+	// TODO: color with assigned bitpair can also join the palette?
 	newPalette := reducePalette(img, layer)
 
 	newPixels := make([]Pixel, len(img.pixels))
@@ -144,6 +143,7 @@ func reducePalette(img IndexedImage, layer Layer) Palette {
 	for _, pixel := range img.pixels {
 
 		// pixels that are already assigned a bitpattern don't count
+		// TODO: they should be part of the palette, but not count towards the max
 		if !pixel.hasBitPattern() {
 			pixel = QuantizePixel(pixel, img.spec.palette)
 			indexToCount[pixel.paletteIndex] += 1

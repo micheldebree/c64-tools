@@ -33,20 +33,7 @@ func main() {
 
 	indexedImage := toIndexedImage(&img, spec)
 	OrderedDither(&indexedImage, bayer4x4, 0.1)
-
-	// TODO: make layers part of spec and process in sequence
-	backgroundLayer := Layer{320, 200, []int8{0}, false}
-
-	// Determine background
-	quantizedImage := quantize(indexedImage, backgroundLayer)
-	bgColor := quantizedImage.pixels[0].paletteIndex
-	fmt.Printf("Background color is %d\n", bgColor)
-
-	// Quantize mc layer
-	mcLayer := Layer{4, 8, []int8{0x01, 0x10, 0x11}, true}
-	cells := getCells(quantizedImage)
-	quantizedCells := quantizeCells(cells, mcLayer)
-	newImage := combine(&quantizedCells, spec)
+	newImage := Quantize(indexedImage)
 
 	result := newImage.Render()
 	WriteImage(*outnamePtr, result)

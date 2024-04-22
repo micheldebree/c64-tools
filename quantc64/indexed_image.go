@@ -10,13 +10,18 @@ type IndexedImage struct {
 	pixels []Pixel
 }
 
-type bitPatternToPaletteIndex map[int]int
+type Layer struct {
+	cellWidth, cellHeight int
+	bitpatterns           []int8
+	isLast                bool // the last layer should quantize all remaining pixels
+}
 
 type Retrospec struct {
 	width      int
 	height     int
 	pixelWidth int
 	palette    Palette
+	layers     []Layer
 }
 
 func (spec Retrospec) displayWidth() int {
@@ -27,8 +32,24 @@ func (spec Retrospec) displayHeight() int {
 	return spec.height
 }
 
-var MCBitmap = Retrospec{160, 200, 2, Colodore}
-var HiresBitmap = Retrospec{320, 200, 1, Colodore}
+var MCBitmap = Retrospec{160, 200, 2, Colodore,
+	[]Layer{
+		{160, 200, []int8{0x00}, false},
+		{4, 8, []int8{0x01, 0x10, 0x11}, true},
+	},
+}
+var HiresBitmap = Retrospec{320, 200, 1, Colodore,
+	[]Layer{
+		{8, 8, []int8{0, 1}, true},
+	},
+}
+
+var MCChar = Retrospec{160, 200, 2, Colodore,
+	[]Layer{
+		{160, 200, []int8{0x00, 0x01, 0x10}, false}, // background, d022, d023
+		{4, 8, []int8{0x11}, true}, // char color
+	},
+}
 
 func newIndexedImage(spec Retrospec) IndexedImage {
 	pixels := make([]Pixel, spec.width*spec.height)
