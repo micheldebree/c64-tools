@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"sort"
 
@@ -12,6 +11,11 @@ import (
 // PaletteDistance The distance from an RGB pixel to each key in a Palette
 // In the order of the palette
 type PaletteDistance map[int]float64
+
+type ReducedPalette struct {
+	palette     Palette
+	bitpatterns map[int]int8
+}
 
 func distance(color1, color2 colorful.Color) float64 {
 	return color1.DistanceRgb(color2)
@@ -27,7 +31,7 @@ func Distances(aColor colorful.Color, palette Palette) PaletteDistance {
 	return result
 }
 
-// The palette index with the smallest distance
+// BestPixelIndex The palette index with the smallest distance
 // also returns the distance itself, meaning the quantization error
 // which is useful for error diffusion dithering
 func BestPixelIndex(distances PaletteDistance) (index int, qerror float64) {
@@ -81,13 +85,10 @@ func quantizeCells(cells []IndexedImage, layer Layer) []IndexedImage {
 
 func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 	// newPalette := reducePaletteKmeans(img, layer)
-	// TODO: assign bitpatterns in reducePalette
 	// TODO: color with assigned bitpair can also join the palette?
 	newPalette := reducePalette(img, layer)
 
 	newPixels := make([]Pixel, len(img.pixels))
-
-	// paletteIndexToBitPattern := assignBitPatterns(layer, newPalette)
 
 	var count int
 	for pi, pixel := range img.pixels {
@@ -97,13 +98,13 @@ func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 		if pixel.hasBitPattern() { // has already been processed
 			newPixel = pixel
 		} else if layer.isLast { // last layer, all pixels should be quantized against new palette
-			newPixel = QuantizePixel(pixel, newPalette)
-			newPixel.bitPattern = 0x11
+			newPixel = QuantizePixel(pixel, newPalette.palette)
+			newPixel.bitPattern = newPalette.bitpatterns[newPixel.paletteIndex]
 		} else { // not the last layer, only process pixels with a bitpattern in the new palette
 			newPixel = QuantizePixel(pixel, img.spec.palette)
-			_, present := newPalette[newPixel.paletteIndex]
+			_, present := newPalette.palette[newPixel.paletteIndex]
 			if present {
-				newPixel.bitPattern = 0x11
+				newPixel.bitPattern = newPalette.bitpatterns[newPixel.paletteIndex]
 			}
 		}
 		newPixels[pi] = newPixel
@@ -115,27 +116,9 @@ func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 	return IndexedImage{img.spec, newPixels}
 }
 
-// assign a bit pattern to each entry in the palette
-// map paletteindex -> bit pattern
-func assignBitPatterns(layer Layer, palette Palette) map[int]int8 {
-
-	if len(layer.bitpatterns) < len(palette) {
-		panic(fmt.Sprintf("Not enough bit patterns (%d) for palette of length (%d)", len(layer.bitpatterns), len(palette)))
-	}
-
-	result := make(map[int]int8)
-
-	i := 0
-	for k := range palette {
-		result[k] = layer.bitpatterns[i]
-		i++
-	}
-	return result
-}
-
 // reduce a palette to maximum number of colors according to their
 // quantized occurence in pixels
-func reducePalette(img IndexedImage, layer Layer) Palette {
+func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 
 	indexToCount := make(map[int]int)
 
@@ -161,10 +144,17 @@ func reducePalette(img IndexedImage, layer Layer) Palette {
 		keys = keys[0:maxColors]
 	}
 
-	result := make(Palette)
+	// if maxColors < len(keys) {
+	// 	panic(fmt.Sprintf("Not enough bit patterns (%d) for palette of length (%d)", len(layer.bitpatterns), len(palette)))
+	// }
 
+	newPalette := make(Palette)
+	newBitpatterns := make(map[int]int8)
+
+	i := 0
 	for _, key := range keys {
-		result[key] = img.spec.palette[key]
+		newPalette[key] = img.spec.palette[key]
+		newBitpatterns[key] = layer.bitpatterns[i]
 	}
-	return result
+	return ReducedPalette{newPalette, newBitpatterns}
 }
