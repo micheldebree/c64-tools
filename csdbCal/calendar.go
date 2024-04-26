@@ -60,16 +60,11 @@ func createReleasesCalendar(releases []ReleaseElement) string {
 
 		calEvent.SetURL(getReleaseUrl(release.ID))
 
-		releasedBy := strings.TrimSpace(release.ReleasedBy)
-		releasedAt := strings.TrimSpace(release.ReleasedAt)
+		releasedBy := release.releasedBy()
 
-		descriptionText := "Released"
-		// TODO: if releaseby is empty, it might not be group but a scener?
-		if len(releasedBy) > 0 {
-			descriptionText += fmt.Sprintf(" by %s", releasedBy)
-		}
-		if len(releasedAt) > 0 {
-			descriptionText += fmt.Sprintf(" at %s", releasedAt)
+		descriptionText := fmt.Sprintf("Released by %s", releasedBy)
+		if len(release.ReleasedAt) > 0 {
+			descriptionText += fmt.Sprintf(" at %s", release.ReleasedAt)
 		}
 		descriptionText += "\n"
 

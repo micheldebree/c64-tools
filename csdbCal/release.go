@@ -14,13 +14,10 @@ type ReleaseElement struct {
 	ReleaseYear   int
 	ReleasedAt    string `xml:"ReleasedAt>Event>Name"`
 	ScreenShot    string
-	ReleasedBy    string          `xml:"ReleasedBy>Group>Name"`
+	ReleaseGroup  string          `xml:"ReleasedBy>Group>Name"`
+	ReleaseHandle string          `xml:"ReleasedBy>Handle>Handle"`
 	Credits       []ReleaseCredit `xml:"Credits>Credit"`
 	DownloadLinks []DownloadLink  `xml:"DownloadLinks>DownloadLink"`
-}
-
-type ReleaseGroup struct {
-	Name string
 }
 
 type ReleaseCredit struct {
@@ -32,6 +29,14 @@ type ReleaseCredit struct {
 type DownloadLink struct {
 	Link      string
 	Downloads int
+}
+
+// Could be released by a group or by a handle
+func (release ReleaseElement) releasedBy() string {
+	if len(release.ReleaseGroup) > 0 {
+		return release.ReleaseGroup
+	}
+	return release.ReleaseHandle
 }
 
 func getRelease(id string) ReleaseElement {
