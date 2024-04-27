@@ -55,3 +55,4 @@ Microphone -. ? .-> Mixer
 - Green = equipment we bring with us
 - [ ] Is there a mic present or should we plug one into the mixer?
 - [ ] Can the knobtwiddeling be filmed live on stage and streamed to the big screen?
+- [ ] How many plugs do we have?
