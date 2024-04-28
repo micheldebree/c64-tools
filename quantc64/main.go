@@ -6,6 +6,7 @@ package main
 // https://stackoverflow.com/questions/41099138/k-means-versus-lsh-algorithm
 // https://terenceshin.medium.com/top-five-clustering-algorithms-you-should-know-instead-of-k-means-clustering-b22f25e5bfb4
 
+// https://stackoverflow.com/questions/37271413/heuristics-to-sort-array-of-2d-3d-points-according-their-mutual-distance/37308369#37308369
 import (
 	"flag"
 	"fmt"

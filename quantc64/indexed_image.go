@@ -34,20 +34,40 @@ func (spec Retrospec) displayHeight() int {
 
 var MCBitmap = Retrospec{160, 200, 2, Colodore,
 	[]Layer{
-		{160, 200, []int8{0x00}, false},
-		{4, 8, []int8{0x01, 0x10, 0x11}, true},
+		{160, 200, []int8{0x00}, false},        // d021
+		{4, 8, []int8{0x01, 0x10, 0x11}, true}, // 0400 (upper nibble), 0400 (lower nibble), d800
 	},
 }
+
 var HiresBitmap = Retrospec{320, 200, 1, Colodore,
 	[]Layer{
-		{8, 8, []int8{0, 1}, true},
+		{8, 8, []int8{0, 1}, true}, // 0400 (lower nibble), 0400 (upper nibble)
 	},
 }
 
 var MCChar = Retrospec{160, 200, 2, Colodore,
 	[]Layer{
-		{160, 200, []int8{0x00, 0x01, 0x10}, false}, // background, d022, d023
-		{4, 8, []int8{0x11}, true}, // char color
+		{160, 200, []int8{0x00, 0x01, 0x10}, false}, // d021, d022, d023
+		{4, 8, []int8{0x11}, true},                  // d800...
+	},
+}
+
+var HiresChar = Retrospec{320, 200, 1, Colodore,
+	[]Layer{
+		{320, 200, []int8{0}, false}, // d021
+		{8, 8, []int8{1}, true},      // d800
+	},
+}
+
+var Hires2Colors = Retrospec{320, 200, 1, Colodore,
+	[]Layer{
+		{320, 200, []int8{0, 1}, true}, // 0400 (lower), 0400 (higher)
+	},
+}
+
+var MCChar3Colors = Retrospec{160, 200, 2, Colodore,
+	[]Layer{
+		{160, 200, []int8{0x00, 0x01, 0x10, 0x11}, true}, // d021, d022, d023, d800...
 	},
 }
 

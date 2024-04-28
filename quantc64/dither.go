@@ -36,7 +36,9 @@ func OrderedDither(img *IndexedImage, matrix IntMatrix, depth float64) {
 	matrixH := len(matrix)
 	matrixW := len(matrix[0])
 
-	for i, pixel := range (*img).pixels {
+	for i := range (*img).pixels {
+		// change pixels in place
+		pixel := &(*img).pixels[i]
 		matrixX := pixel.x % matrixW
 		matrixY := pixel.y % matrixH
 		matrixV := normalizedMatrix[matrixY][matrixX]
@@ -48,7 +50,6 @@ func OrderedDither(img *IndexedImage, matrix IntMatrix, depth float64) {
 		}
 
 		pixel.color = color
-		(*img).pixels[i] = pixel
 	}
 }
 
