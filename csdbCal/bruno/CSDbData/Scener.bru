@@ -1,0 +1,21 @@
+meta {
+  name: Scener
+  type: http
+  seq: 3
+}
+
+get {
+  url: https://csdb.dk/webservice/?type=scener&id=1130&depth=1
+  body: none
+  auth: none
+}
+
+query {
+  type: scener
+  id: 1130
+  depth: 1
+}
+
+docs {
+  depth 1 gives basic scener info without all credits
+}
