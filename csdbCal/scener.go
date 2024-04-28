@@ -2,14 +2,10 @@ package main
 
 // CSDbDataSceners XML structure for Scener
 type CSDbDataSceners struct {
-	Handle HandleElement
+	Handle string `xml:"Handle>Handle"`
 }
 
-type HandleElement struct {
-	Handle string
-}
-
-func getScener(id string) HandleElement {
+func getScener(id string) string {
 	decoder := getItemXMLDecoder(ScenerType, id, 1)
 
 	var csdbData CSDbDataSceners

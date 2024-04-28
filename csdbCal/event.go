@@ -1,5 +1,10 @@
 package main
 
+import (
+	"strings"
+	"time"
+)
+
 // CSDbData XML structure for Event
 type CSDbData struct {
 	Event EventElement
@@ -33,6 +38,18 @@ func getEvent(id string) EventElement {
 	abortOnError(err)
 
 	return csdbData.Event
+}
+
+func (event EventElement) location() string {
+	return strings.Join([]string{event.Address, event.City, event.Country}, ",")
+}
+
+func (event EventElement) startDate() time.Time {
+	return time.Date(event.StartYear, time.Month(event.StartMonth), event.StartDay, 0, 0, 0, 0, time.UTC)
+}
+
+func (event EventElement) endDate() time.Time {
+	return time.Date(event.EndYear, time.Month(event.EndMonth), event.EndDay, 0, 0, 0, 0, time.UTC)
 }
 
 // Get events for a list of ids

@@ -87,8 +87,3 @@ func getIdFromUrl(anUrl string) string {
 
 	return query["id"][0]
 }
-
-// get the CSDb page URL for a release
-func getReleaseUrl(id string) string {
-	return fmt.Sprintf(ReleaseUrl, id)
-}
