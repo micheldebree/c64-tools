@@ -3,16 +3,54 @@
 - [Tubesockor](https://www.youtube.com/@tubesockor) (Thomas Jansson)
 - Youth (Michel de Bree)
 
+- [ ] How much time do we need/have?
+
+In short:
+
+- Brief Sidfactory 2 introduction/commercial (Michel)
+  - No demo, only screenshots in presentation
+- Short intro about ASID and how it came about in SF2 (Thomas)
+  - Open source
+- Live demo (Thomas)
+  - Live tweaking of SID playing in SF2
+  - Remix SID from the compo?
+  - Show different chips?
+
 ## Brief introduction about Sidfactory 2
 
-- The team
-  - Laxity
-  - JCH
-  - Youth
-  - Tubesockor
-- Highlights
-  - Multi-platform, open-source, multiple routines and stuff
+- Highlights (add screenshots)
+  - Multi-platform
+    - Windows
+    - MacOS
+    - Linux
+  - Multiple routines
+    - Laxity
+    - JCH's Newplayer
+  - Multiple songs
+  - Unlimited undo
+  - Imports
+    - Goattracker
+    - Cheesecutter
+    - MOD
+  - Well documented (help overlay)
+  - Open-source
+  - Built by legends (and a fanboy)
+    - Laxity
+      - Owner, lead, design, allmost all code
+    - JCH
+      - Converters, help overlay, design, documentation
+    - Youth
+      - MacOS version, Github, small functionality
+    - Tubesockor
+      - Hardware support (ASID)
   - ASID support!
+- The team
+- Examples of music/musicians that use SF2 (mention tunes in demos)
+  - Laxity, JCH
+  - SMC
+  - Vincenzo
+  - The Syndrom
+  - Animal? ;)
 - Introduction about ASID
   - What is it?
   - How did it end up in SF2?
@@ -22,6 +60,11 @@
   - Full screen
   - Commodore 64 font
   - Say something about most requested features like saving instruments?
+  - Call to action
+    - Give it a try
+    - Where to get SF2
+    - How to contact us
+    - How to report bugs/request features
 
 ## Demo
 
