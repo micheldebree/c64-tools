@@ -39,6 +39,12 @@ func main() {
 	result := newImage.Render()
 	WriteImage(*outnamePtr, result)
 
+	tiledImage := cutIntoTiles(result)
+
+	fmt.Printf("Nr of chars: %d\n", len(tiledImage))
+
 	fmt.Printf("%v, %v\n", indexedImage.spec.width, indexedImage.spec.height)
+
+	countUniqueTiles(result)
 
 }

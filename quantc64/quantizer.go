@@ -12,6 +12,8 @@ import (
 // In the order of the palette
 type PaletteDistance map[int]float64
 
+// Palette that has been reduced to the number of bitpatterns supported in
+// a specific Layer of a Retrospec
 type ReducedPalette struct {
 	palette     Palette
 	bitpatterns map[int]int8
@@ -136,13 +138,10 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 		keys = keys[0:maxColors]
 	}
 
-	// if maxColors < len(keys) {
-	// 	panic(fmt.Sprintf("Not enough bit patterns (%d) for palette of length (%d)", len(layer.bitpatterns), len(palette)))
-	// }
-
 	newPalette := make(Palette)
 	newBitpatterns := make(map[int]int8)
 
+	// assign bitpatterns
 	i := 0
 	for _, key := range keys {
 		newPalette[key] = img.spec.palette[key]
@@ -155,7 +154,6 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 	for key := range existingBitpatterns {
 		newPalette[key] = img.spec.palette[key]
 		newBitpatterns[key] = existingBitpatterns[key]
-		// fmt.Printf("Bit pattern %d with color %d added to palette", newBitpatterns[key], key )
 	}
 
 	return ReducedPalette{newPalette, newBitpatterns}

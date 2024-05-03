@@ -81,7 +81,7 @@ func getPixels(image *image.Image) []Pixel {
 	w, h := (*image).Bounds().Max.X, (*image).Bounds().Max.Y
 	result := make([]Pixel, w*h)
 
-	for y := range (*image).Bounds().Max.Y {
+	for y := range h {
 		offs := y * w
 		for x := range w {
 			result[offs+x] = getPixel(image, x, y)
