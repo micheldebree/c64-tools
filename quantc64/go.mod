@@ -1,4 +1,4 @@
-module github.com/micheldebree/quantizer
+module github.com/micheldebree/retrospex
 
 go 1.22.0
 

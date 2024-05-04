@@ -8,6 +8,22 @@ import (
 
 type Palette map[int]colorful.Color
 
+var C64Palettes = map[string]Palette{
+	"vice":              Vice,
+	"vice_old_lum":      ViceOldLum,
+	"pepto":             Pepto,
+	"pantaloon":         Pantaloon,
+	"archmage":          Archmage,
+	"electric":          Electric,
+	"ste":               Ste,
+	"perplex_1":         Perplex,
+	"perplex_2":         Perplex2,
+	"colodore":          Colodore,
+	"vice_371_internal": Vice371Internal,
+	"lenyn":             Lenyn,
+	// TODO: PALette
+}
+
 var Vice = createPalette(
 	color.Palette{
 		color.RGBA{0x00, 0x00, 0x00, 0xff},

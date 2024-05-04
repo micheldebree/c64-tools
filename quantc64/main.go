@@ -15,21 +15,42 @@ import (
 	_ "image/png"
 )
 
+type Options struct {
+	OutFile        string
+	Mode           string
+	DitherMode     string
+	DitherStrenght int8
+}
+
 func main() {
 
-	outnamePtr := flag.String("o", "out.png", "output filename")
+	var options Options
+
+	flag.StringVar(&options.OutFile, "o", "out.png", "output filename")
+	flag.StringVar(&options.OutFile, "out", "out.png", "output filename")
+	flag.StringVar(&options.Mode, "m", "koala", "graphics mode")
+	flag.StringVar(&options.Mode, "mode", "koala", "graphics mode")
 	flag.Parse()
 
 	args := flag.Args()
 
 	if len(args) != 1 {
-		panic("filename is mandatory")
+		fmt.Print("filename is mandatory")
+		return
 	}
 
-	spec := MCBitmap
+	spec, isPresent := C64Specs[options.Mode]
+	if !isPresent {
+		fmt.Printf("Unknown mode: %s", options.Mode)
+		return
+	}
 
 	infile := args[0]
-	img := ReadImageFile(infile)
+	img, err := ReadImageFile(infile)
+	if err != nil {
+		fmt.Print(err)
+		return
+	}
 	img = Resize(&img, spec.width, spec.height)
 
 	indexedImage := toIndexedImage(&img, spec)
@@ -37,14 +58,7 @@ func main() {
 	newImage := Quantize(indexedImage)
 
 	result := newImage.Render()
-	WriteImage(*outnamePtr, result)
-
-	tiledImage := cutIntoTiles(result)
-
-	fmt.Printf("Nr of chars: %d\n", len(tiledImage))
-
-	fmt.Printf("%v, %v\n", indexedImage.spec.width, indexedImage.spec.height)
-
-	countUniqueTiles(result)
+	WriteImage(options.OutFile, result)
+	fmt.Print(options.OutFile)
 
 }

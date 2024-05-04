@@ -13,19 +13,23 @@ func abortOnError(err error) {
 }
 
 // ReadImageFile read an image from a file
-func ReadImageFile(filename string) image.Image {
+func ReadImageFile(filename string) (image.Image, error) {
 
 	f, err := os.Open(filename)
-	abortOnError(err)
+	if err != nil {
+		return nil, err
+	}
 	defer func(f *os.File) {
 		err := f.Close()
 		abortOnError(err)
 	}(f)
 
 	img, _, err := image.Decode(f)
-	abortOnError(err)
+	if err != nil {
+		return nil, err
+	}
 
-	return img
+	return img, nil
 }
 
 func WriteImage(filename string, image image.Image) {
