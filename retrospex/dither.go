@@ -6,6 +6,7 @@ type IntMatrix [][]int
 type FloatMatrix [][]float64
 
 var DitherMatrices = map[string]IntMatrix{
+	"none": {{0}},
 	"bayer2x2": {
 		{0, 2},
 		{3, 1},
@@ -30,9 +31,9 @@ var DitherMatrices = map[string]IntMatrix{
 
 // OrderedDither Apply ordered dithering by offsetting color channels with
 // a matrix. N.B. the image itself is adjusted
-func OrderedDither(img *IndexedImage, matrix IntMatrix, depth float64) {
+func OrderedDither(img *IndexedImage, matrix IntMatrix, depth int) {
 
-	normalizedMatrix := normalize(matrix, depth)
+	normalizedMatrix := normalize(matrix, float64(depth)/255.)
 	matrixH := len(matrix)
 	matrixW := len(matrix[0])
 

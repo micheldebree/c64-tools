@@ -19,18 +19,20 @@ import (
 )
 
 var Version = "0.0.1"
+var Arch = "-"
 
 const defaultOutput = "out.png"
 const defaultMode = "koala"
 const defaultPalette = "colodore"
-const defaultDitherMatrix = "bayer2x2"
+const defaultDitherMatrix = "bayer4x4"
+const defaultDitherDepth = 25
 
 type Options struct {
-	OutFile        string
-	Mode           string
-	Palette        string
-	DitherMatrix   string
-	DitherStrength int8
+	OutFile      string
+	Mode         string
+	Palette      string
+	DitherMatrix string
+	DitherDepth  int
 }
 
 func main() {
@@ -41,6 +43,7 @@ func main() {
 	flag.StringVar(&options.Mode, "m", defaultMode, "graphics mode")
 	flag.StringVar(&options.Palette, "p", defaultPalette, "palette")
 	flag.StringVar(&options.DitherMatrix, "dm", defaultDitherMatrix, "dither matrix")
+	flag.IntVar(&options.DitherDepth, "dd", defaultDitherDepth, "dither depth")
 	flag.Parse()
 
 	args := flag.Args()
@@ -67,6 +70,10 @@ func main() {
 		printError(fmt.Sprintf("Unknown dither matrix: %s", options.DitherMatrix))
 	}
 
+	if options.DitherDepth < 0 || options.DitherDepth > 255 {
+		printError(fmt.Sprintf("Unsupported dither depth: %d, must be 0-100", options.DitherDepth))
+	}
+
 	infile := args[0]
 	img, err := ReadImageFile(infile)
 	if err != nil {
@@ -76,7 +83,7 @@ func main() {
 	img = Resize(&img, spec.width, spec.height)
 
 	indexedImage := toIndexedImage(&img, spec, palette)
-	OrderedDither(&indexedImage, ditherMatrix, 0.1)
+	OrderedDither(&indexedImage, ditherMatrix, options.DitherDepth)
 	newImage := Quantize(indexedImage)
 
 	result := newImage.Render()
@@ -90,11 +97,12 @@ func printError(message string) {
 }
 
 func help() {
-	fmt.Printf("\nretrospex %s by yth\n", Version)
+	fmt.Printf("\nretrospex %s.%s by yth\n", Version, Arch)
 	fmt.Printf("\nUsage: retrospex [options] input.png\n\n")
 	fmt.Printf("Options:\n\n")
 	fmt.Printf("\t-o\n\t\tOutput filename (default %s)\n", defaultOutput)
 	fmt.Printf("\t-m\n\t\tGraphics mode. (default %s), One of %s\n", defaultMode, strings.Join(maps.Keys(C64Specs), ","))
 	fmt.Printf("\t-p\n\t\tPalette (default %s). One of %s\n", defaultPalette, strings.Join(maps.Keys(C64Palettes), ","))
 	fmt.Printf("\t-dm\n\t\tDither matrix (default %s). One of %s\n", defaultDitherMatrix, strings.Join(maps.Keys(DitherMatrices), ","))
+	fmt.Printf("\t-dd\n\t\tDither depth (default %d). 0-255\n", defaultDitherDepth)
 }
