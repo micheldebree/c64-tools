@@ -11,7 +11,6 @@ type Retrospec struct {
 	width      int
 	height     int
 	pixelWidth int
-	palette    Palette
 	layers     []Layer
 }
 
@@ -31,40 +30,40 @@ var C64Specs = map[string]Retrospec{
 	"sccharset":    SCCharsetSpec,
 }
 
-var KoalaSpec = Retrospec{160, 200, 2, Colodore,
+var KoalaSpec = Retrospec{160, 200, 2,
 	[]Layer{
 		{160, 200, []int8{0x00}, false},        // d021
 		{4, 8, []int8{0x01, 0x10, 0x11}, true}, // 0400,x (upper nibble), 0400,x (lower nibble), d800,x
 	},
 }
 
-var HiresSpec = Retrospec{320, 200, 1, Colodore,
+var HiresSpec = Retrospec{320, 200, 1,
 	[]Layer{
 		{8, 8, []int8{0, 1}, true}, // 0400,x (lower nibble), 0400,x (upper nibble)
 	},
 }
 
-var MixedCharsetSpec = Retrospec{160, 200, 2, Colodore,
+var MixedCharsetSpec = Retrospec{160, 200, 2,
 	[]Layer{
 		{160, 200, []int8{0x00, 0x01, 0x10}, false}, // d021, d022, d023
 		{4, 8, []int8{0x11}, true},                  // d800,x
 	},
 }
 
-var SCCharsetSpec = Retrospec{320, 200, 1, Colodore,
+var SCCharsetSpec = Retrospec{320, 200, 1,
 	[]Layer{
 		{320, 200, []int8{0}, false}, // d021
 		{8, 8, []int8{1}, true},      // d800,x
 	},
 }
 
-var Hires2Colors = Retrospec{320, 200, 1, Colodore,
+var Hires2Colors = Retrospec{320, 200, 1,
 	[]Layer{
 		{320, 200, []int8{0, 1}, true}, // 0400,x (lower), 0400,x (higher)
 	},
 }
 
-var MCCharsetSpec = Retrospec{160, 200, 2, Colodore,
+var MCCharsetSpec = Retrospec{160, 200, 2,
 	[]Layer{
 		{160, 200, []int8{0x00, 0x01, 0x10, 0x11}, true}, // d021, d022, d023, d800...
 	},

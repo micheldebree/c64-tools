@@ -9,9 +9,9 @@ import (
 	"golang.org/x/exp/maps"
 )
 
-func countUniqueTiles(img image.Image, spec Retrospec) {
+func countUniqueTiles(img image.Image, spec Retrospec, pal Palette) {
 
-	tiles := cutIntoTiles(img, spec)
+	tiles := cutIntoTiles(img, spec, pal)
 
 	theMap := make(map[string]int)
 	for _, tile := range tiles {
@@ -27,7 +27,7 @@ func countUniqueTiles(img image.Image, spec Retrospec) {
 
 }
 
-func cutIntoTiles(img image.Image, spec Retrospec) []IndexedImage {
+func cutIntoTiles(img image.Image, spec Retrospec, pal Palette) []IndexedImage {
 
 	tileW, tileH := 8, 8
 	w, h := img.Bounds().Max.X, img.Bounds().Max.Y
@@ -47,7 +47,7 @@ func cutIntoTiles(img image.Image, spec Retrospec) []IndexedImage {
 				SubImage(r image.Rectangle) image.Image
 			}).SubImage(image.Rect(x*tileW, y*tileH, x*tileW+tileW, y*tileH+tileH))
 
-			iimg := toIndexedImage(&tile, spec)
+			iimg := toIndexedImage(&tile, spec, pal)
 
 			fmt.Printf("Tile bounds: %v\n", tile.Bounds())	
 

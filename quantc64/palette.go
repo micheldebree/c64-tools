@@ -9,17 +9,17 @@ import (
 type Palette map[int]colorful.Color
 
 var C64Palettes = map[string]Palette{
+	"colodore":          Colodore,
+	"pepto":             Pepto,
 	"vice":              Vice,
 	"vice_old_lum":      ViceOldLum,
-	"pepto":             Pepto,
+	"vice_371_internal": Vice371Internal,
 	"pantaloon":         Pantaloon,
 	"archmage":          Archmage,
 	"electric":          Electric,
 	"ste":               Ste,
 	"perplex_1":         Perplex,
 	"perplex_2":         Perplex2,
-	"colodore":          Colodore,
-	"vice_371_internal": Vice371Internal,
 	"lenyn":             Lenyn,
 	// TODO: PALette
 }

@@ -107,7 +107,7 @@ func getCells(img IndexedImage, layer Layer) []IndexedImage {
 					cell[py*layer.cellWidth+px] = img.PixelAt(cx*layer.cellWidth+px, cy*layer.cellHeight+py)
 				}
 			}
-			result[cy*nrCols+cx] = IndexedImage{img.spec, cell}
+			result[cy*nrCols+cx] = IndexedImage{img.spec, img.palette, cell}
 		}
 	}
 	return result

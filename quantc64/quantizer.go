@@ -12,7 +12,7 @@ import (
 // In the order of the palette
 type PaletteDistance map[int]float64
 
-// Palette that has been reduced to the number of bitpatterns supported in
+// ReducedPalette Palette that has been reduced to the number of bitpatterns supported in
 // a specific Layer of a Retrospec
 type ReducedPalette struct {
 	palette     Palette
@@ -68,7 +68,7 @@ func Quantize(img IndexedImage) IndexedImage {
 	for _, layer := range img.spec.layers {
 		cells := getCells(result, layer)
 		qCells := quantizeCells(cells, layer)
-		result = combine(&qCells, img.spec)
+		result = combine(&qCells)
 	}
 	return result
 }
@@ -93,7 +93,7 @@ func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 				QuantizePixel(&(img.pixels[pi]), newPalette.palette)
 				img.pixels[pi].bitPattern = newPalette.bitpatterns[img.pixels[pi].paletteIndex]
 			} else { // not the last layer, only process pixels that quantize to a bitpattern in the new palette
-				QuantizePixel(&(img.pixels[pi]), img.spec.palette)
+				QuantizePixel(&(img.pixels[pi]), img.palette)
 				bitpattern, present := newPalette.bitpatterns[img.pixels[pi].paletteIndex]
 				if present {
 					img.pixels[pi].bitPattern = bitpattern
@@ -106,6 +106,7 @@ func quantizeCell(img IndexedImage, layer Layer) IndexedImage {
 
 // reduce a palette to maximum number of colors according to their
 // quantized occurence in pixels. assign a bitpattern to each palette entry
+// only considers pixels that don't have a bitpattern assigned yet
 func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 
 	indexToCount := make(map[int]int)
@@ -119,7 +120,7 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 
 		// pixels that are already assigned a bitpattern don't count
 		if !pixel.hasBitPattern() {
-			QuantizePixel(&pixel, img.spec.palette)
+			QuantizePixel(&pixel, img.palette)
 			indexToCount[pixel.paletteIndex]++
 		} else {
 			existingBitpatterns[pixel.paletteIndex] = pixel.bitPattern
@@ -144,7 +145,7 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 	// assign bitpatterns
 	i := 0
 	for _, key := range keys {
-		newPalette[key] = img.spec.palette[key]
+		newPalette[key] = img.palette[key]
 		newBitpatterns[key] = layer.bitpatterns[i]
 		i++
 	}
@@ -152,7 +153,7 @@ func reducePalette(img IndexedImage, layer Layer) ReducedPalette {
 	// Add existing bitpatterns to the palette so they also get a chance
 	// TODO: does this make any difference?
 	for key := range existingBitpatterns {
-		newPalette[key] = img.spec.palette[key]
+		newPalette[key] = img.palette[key]
 		newBitpatterns[key] = existingBitpatterns[key]
 	}
 

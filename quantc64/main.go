@@ -13,52 +13,88 @@ import (
 	_ "image/gif"
 	_ "image/jpeg"
 	_ "image/png"
+	"strings"
+
+	"golang.org/x/exp/maps"
 )
+
+var Version = "0.0.1"
+
+const defaultOutput = "out.png"
+const defaultMode = "koala"
+const defaultPalette = "colodore"
+const defaultDitherMatrix = "bayer2x2"
 
 type Options struct {
 	OutFile        string
 	Mode           string
-	DitherMode     string
-	DitherStrenght int8
+	Palette        string
+	DitherMatrix   string
+	DitherStrength int8
 }
 
 func main() {
 
 	var options Options
 
-	flag.StringVar(&options.OutFile, "o", "out.png", "output filename")
-	flag.StringVar(&options.OutFile, "out", "out.png", "output filename")
-	flag.StringVar(&options.Mode, "m", "koala", "graphics mode")
-	flag.StringVar(&options.Mode, "mode", "koala", "graphics mode")
+	flag.StringVar(&options.OutFile, "o", defaultOutput, "output filename")
+	flag.StringVar(&options.Mode, "m", defaultMode, "graphics mode")
+	flag.StringVar(&options.Palette, "p", defaultPalette, "palette")
+	flag.StringVar(&options.DitherMatrix, "dm", defaultDitherMatrix, "dither matrix")
 	flag.Parse()
 
 	args := flag.Args()
 
 	if len(args) != 1 {
-		fmt.Print("filename is mandatory")
+		help()
 		return
 	}
 
 	spec, isPresent := C64Specs[options.Mode]
 	if !isPresent {
-		fmt.Printf("Unknown mode: %s", options.Mode)
+		printError(fmt.Sprintf("Unknown mode: %s", options.Mode))
 		return
+	}
+
+	palette, isPresent := C64Palettes[options.Palette]
+	if !isPresent {
+		printError(fmt.Sprintf("Unknown palette: %s", options.Palette))
+		return
+	}
+
+	ditherMatrix, isPresent := DitherMatrices[options.DitherMatrix]
+	if !isPresent {
+		printError(fmt.Sprintf("Unknown dither matrix: %s", options.DitherMatrix))
 	}
 
 	infile := args[0]
 	img, err := ReadImageFile(infile)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Print(err.Error())
 		return
 	}
 	img = Resize(&img, spec.width, spec.height)
 
-	indexedImage := toIndexedImage(&img, spec)
-	OrderedDither(&indexedImage, bayer4x4, 0.1)
+	indexedImage := toIndexedImage(&img, spec, palette)
+	OrderedDither(&indexedImage, ditherMatrix, 0.1)
 	newImage := Quantize(indexedImage)
 
 	result := newImage.Render()
 	WriteImage(options.OutFile, result)
 	fmt.Print(options.OutFile)
+}
 
+func printError(message string) {
+	fmt.Print("\nERROR: ", message, "\n")
+	help()
+}
+
+func help() {
+	fmt.Printf("\nretrospex %s by yth\n", Version)
+	fmt.Printf("\nUsage: retrospex [options] input.png\n\n")
+	fmt.Printf("Options:\n\n")
+	fmt.Printf("\t-o\n\t\tOutput filename (default %s)\n", defaultOutput)
+	fmt.Printf("\t-m\n\t\tGraphics mode. (default %s), One of %s\n", defaultMode, strings.Join(maps.Keys(C64Specs), ","))
+	fmt.Printf("\t-p\n\t\tPalette (default %s). One of %s\n", defaultPalette, strings.Join(maps.Keys(C64Palettes), ","))
+	fmt.Printf("\t-dm\n\t\tDither matrix (default %s). One of %s\n", defaultDitherMatrix, strings.Join(maps.Keys(DitherMatrices), ","))
 }

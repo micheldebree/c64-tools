@@ -6,18 +6,19 @@ import (
 
 // IndexedImage an image with pixels in left to right, top to bottom order
 type IndexedImage struct {
-	spec   Retrospec
-	pixels []Pixel
+	spec    Retrospec
+	palette Palette
+	pixels  []Pixel
 }
 
-func newIndexedImage(spec Retrospec) IndexedImage {
+func newIndexedImage(spec Retrospec, pal Palette) IndexedImage {
 	pixels := make([]Pixel, spec.width*spec.height)
-	return IndexedImage{spec, pixels}
+	return IndexedImage{spec, pal, pixels}
 }
 
-func toIndexedImage(img *image.Image, spec Retrospec) IndexedImage {
+func toIndexedImage(img *image.Image, spec Retrospec, pal Palette) IndexedImage {
 	pixels := getPixels(img)
-	return IndexedImage{spec, pixels}
+	return IndexedImage{spec, pal, pixels}
 }
 
 func (img *IndexedImage) PixelAt(x, y int) Pixel {
@@ -28,8 +29,10 @@ func (img *IndexedImage) SetPixel(pixel Pixel) {
 	img.pixels[pixel.y*img.spec.width+pixel.x] = pixel
 }
 
-func combine(cells *[]IndexedImage, spec Retrospec) IndexedImage {
-	result := newIndexedImage(spec)
+func combine(cells *[]IndexedImage) IndexedImage {
+	spec := (*cells)[0].spec
+	pal := (*cells)[0].palette
+	result := newIndexedImage(spec, pal)
 
 	for _, c := range *cells {
 		for _, p := range c.pixels {
@@ -49,7 +52,7 @@ func (img *IndexedImage) Render() image.Image {
 		for x := range img.spec.width {
 			pixel := img.PixelAt(x, y)
 			for xx := range img.spec.pixelWidth {
-				result.SetRGBA(x*img.spec.pixelWidth+xx, y, toColor(pixel.getColor(img.spec.palette)))
+				result.SetRGBA(x*img.spec.pixelWidth+xx, y, toColor(pixel.getColor(img.palette)))
 			}
 		}
 	}
