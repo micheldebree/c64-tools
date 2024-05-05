@@ -30,6 +30,7 @@ all: \
 .PHONY: clean
 clean:
 	rm *.png
+	rm retrospex_*
 
 retrospex_linux_amd64: $(SRC)
 	CGO_ENABLED=$(CGO) GOOS=linux GOARCH=amd64 go build $(GOBUILDFLAGS) -ldflags="$(LDFLAGS) -X main.Arch=linux.amd64" -o $@
