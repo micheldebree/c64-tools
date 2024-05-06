@@ -27,7 +27,9 @@ In short:
     - Laxity drivers
     - JCH's Newplayer
   - Multiple songs
+  - JCH editor style continous sequences
   - Unlimited undo
+  - Instrument names and orderlist text
   - Imports
     - Goattracker
     - Cheesecutter
@@ -36,6 +38,7 @@ In short:
   - Open-source
   - Built by legends Laxity & JCH
   - ASID support!
+  - Color schemes
 - The team
   - Laxity
     - Owner, lead, design, allmost all code
