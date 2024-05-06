@@ -24,7 +24,7 @@ In short:
     - MacOS
     - Linux
   - Multiple routines
-    - Laxity
+    - Laxity drivers
     - JCH's Newplayer
   - Multiple songs
   - Unlimited undo
@@ -34,18 +34,18 @@ In short:
     - MOD
   - Well documented (help overlay)
   - Open-source
-  - Built by legends (and a fanboy)
-    - Laxity
-      - Owner, lead, design, allmost all code
-    - JCH
-      - Converters, help overlay, design, documentation
-    - Youth
-      - MacOS version, Github, small functionality
-    - Tubesockor
-      - Hardware support (ASID)
+  - Built by legends Laxity & JCH
   - ASID support!
 - The team
-- Examples of music/musicians that use SF2 (mention tunes in demos)
+  - Laxity
+    - Owner, lead, design, allmost all code
+  - JCH
+    - Converters, help overlay, design, documentation
+  - Youth
+    - MacOS version, Github, small functionality
+  - Tubesockor
+    - Hardware support (ASID)
+- Examples of music/musicians that use SF2 (screenshots from demos)
   - Laxity, JCH
   - SMC
   - Vincenzo
@@ -57,14 +57,15 @@ In short:
 - SidFactory 2 roadmap
   - ASID
   - Multispeed
+  - MIDI in?
   - Full screen
   - Commodore 64 font
   - Say something about most requested features like saving instruments?
-  - Call to action
-    - Give it a try
-    - Where to get SF2
-    - How to contact us
-    - How to report bugs/request features
+- Call to action
+  - Give it a try
+  - Where to get SF2
+  - How to contact us
+  - How to report bugs/request features
 
 ## Demo
 
